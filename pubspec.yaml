@@ -30,11 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  google_sign_in: ^5.0.4 # Ensure you're using the latest version
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.6
+  cupertino_icons: ^1.0.2
+  google_sign_in: ^5.0.0
 
 dev_dependencies:
   flutter_test:
@@ -88,3 +85,5 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+  assets:     # 새로 추가한 부분
+    - assets/ # assets 폴더의 모든 이미지를 불러옴
