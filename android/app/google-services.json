@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "26975702543",
+    "project_id": "bevvy-91cf0",
+    "storage_bucket": "bevvy-91cf0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:26975702543:android:56473c57c8593064e21d7a",
+        "android_client_info": {
+          "package_name": "com.example.bevvy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDIEiGzYNEudYVmcDaO4V1NkKC3-1E9Uv8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
