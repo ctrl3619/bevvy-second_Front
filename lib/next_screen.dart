@@ -8,6 +8,7 @@ class NextScreen extends StatelessWidget {
         title: Image.asset('assets/logo.png', height: 40),
         centerTitle: false,
         backgroundColor: Colors.black,
+        automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
         child: Padding(

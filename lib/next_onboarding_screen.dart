@@ -8,6 +8,9 @@ class NextOnboardingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);
+    final PageController pageController =
+        PageController(viewportFraction: 0.85);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('맥주 평가'),
@@ -26,7 +29,7 @@ class NextOnboardingScreen extends StatelessWidget {
         children: [
           Expanded(
             child: PageView.builder(
-              controller: PageController(viewportFraction: 0.85),
+              controller: pageController,
               itemCount: appState.totalBeers,
               itemBuilder: (context, index) {
                 return BeerCard(
@@ -34,7 +37,14 @@ class NextOnboardingScreen extends StatelessWidget {
                   rating: appState.ratings[index],
                   onRatingUpdate: (rating) {
                     appState.rateBeer(index, rating);
+                    if (rating > 0 && index < appState.totalBeers - 1) {
+                      pageController.nextPage(
+                        duration: Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    }
                   },
+                  pageController: pageController, // pageController 전달
                 );
               },
             ),
