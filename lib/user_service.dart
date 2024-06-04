@@ -13,6 +13,18 @@ class UserService {
       try {
         DocumentSnapshot userDoc =
             await _firestore.collection('users').doc(user.uid).get();
+
+        // 문서가 존재하지 않을 경우 문서 생성
+        if (!userDoc.exists) {
+          await _firestore.collection('users').doc(user.uid).set({
+            'onboardingCompleted': onboardingCompleted,
+            'nextOnboardingCompleted': nextOnboardingCompleted,
+          });
+          print(
+              'User status created: onboardingCompleted=$onboardingCompleted, nextOnboardingCompleted=$nextOnboardingCompleted');
+          return;
+        }
+
         bool currentOnboardingCompleted =
             userDoc['onboardingCompleted'] ?? false;
         bool currentNextOnboardingCompleted =
@@ -25,6 +37,8 @@ class UserService {
             'onboardingCompleted': onboardingCompleted,
             'nextOnboardingCompleted': nextOnboardingCompleted,
           }, SetOptions(merge: true));
+          print(
+              'User status updated: onboardingCompleted=$onboardingCompleted, nextOnboardingCompleted=$nextOnboardingCompleted');
         }
       } catch (e) {
         print('Error updating user status: $e');
@@ -39,9 +53,22 @@ class UserService {
       try {
         DocumentSnapshot userDoc =
             await _firestore.collection('users').doc(user.uid).get();
+
+        // 문서가 존재하지 않을 경우 기본 상태 반환
+        if (!userDoc.exists) {
+          return {
+            'onboardingCompleted': false,
+            'nextOnboardingCompleted': false,
+          };
+        }
+
         bool onboardingCompleted = userDoc['onboardingCompleted'] ?? false;
         bool nextOnboardingCompleted =
             userDoc['nextOnboardingCompleted'] ?? false;
+
+        print(
+            'User status retrieved: onboardingCompleted=$onboardingCompleted, nextOnboardingCompleted=$nextOnboardingCompleted');
+
         return {
           'onboardingCompleted': onboardingCompleted,
           'nextOnboardingCompleted': nextOnboardingCompleted,
@@ -68,6 +95,10 @@ class UserService {
         bool onboardingCompleted = userDoc['onboardingCompleted'] ?? false;
         bool nextOnboardingCompleted =
             userDoc['nextOnboardingCompleted'] ?? false;
+
+        print(
+            'User status changed: onboardingCompleted=$onboardingCompleted, nextOnboardingCompleted=$nextOnboardingCompleted');
+
         onChange({
           'onboardingCompleted': onboardingCompleted,
           'nextOnboardingCompleted': nextOnboardingCompleted,
