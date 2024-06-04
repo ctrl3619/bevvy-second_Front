@@ -55,6 +55,9 @@ class NextOnboardingScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
                 onPressed: () {
+                  // AppState의 completeNextOnboarding 메서드를 호출하여 온보딩 완료 상태를 업데이트
+                  Provider.of<AppState>(context, listen: false)
+                      .completeNextOnboarding();
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => NextScreen()),

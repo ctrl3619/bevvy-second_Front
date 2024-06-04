@@ -35,6 +35,9 @@ class OnboardingScreen extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: appState.selectedTastes.isNotEmpty
                       ? () {
+                          // AppState의 completeOnboarding 메서드를 호출하여 온보딩 완료 상태를 업데이트
+                          Provider.of<AppState>(context, listen: false)
+                              .completeOnboarding();
                           Navigator.push(
                             context,
                             MaterialPageRoute(
