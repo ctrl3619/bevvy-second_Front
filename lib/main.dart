@@ -13,13 +13,7 @@ import 'user_service.dart';
 // 애플리케이션의 진입점
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Flutter 엔진 초기화
-  try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-  } catch (e) {
-    print("Firebase initialization error: $e"); // Firebase 초기화 오류 처리
-  }
+  await initializeFirebase(); // Firebase 초기화
   runApp(
     ChangeNotifierProvider(
       // 상태 관리를 위한 Provider를 설정합니다.
@@ -27,6 +21,17 @@ void main() async {
       child: MyApp(), // MyApp 위젯을 최상위 위젯으로 설정
     ),
   );
+}
+
+// Firebase 초기화 메서드
+Future<void> initializeFirebase() async {
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    print("Firebase initialization error: $e"); // Firebase 초기화 오류 처리
+  }
 }
 
 class MyApp extends StatelessWidget {
