@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'next_screen.dart'; // next_screen.dart 파일을 import합니다.
 import 'recommend.dart';
+import 'mypage.dart';
 
 class BottomNavigation extends StatefulWidget {
   @override
@@ -25,6 +26,10 @@ class _BottomNavigationState extends State<BottomNavigation> {
             MaterialPageRoute(
                 builder: (context) => BeerRecommendationScreen()));
         break;
+      case 3:
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => MyPage()));
+        break;
       // 기타 케이스 추가
     }
   }
@@ -39,7 +44,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
         BottomNavigationBarItem(icon: Icon(Icons.star), label: '추천'),
         BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
         BottomNavigationBarItem(
-            icon: Icon(Icons.account_circle), label: 'Profile'),
+            icon: Icon(Icons.account_circle), label: '마이페이지'),
       ],
       currentIndex: _selectedIndex,
       onTap: _onItemTapped,
