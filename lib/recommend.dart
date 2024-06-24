@@ -41,7 +41,7 @@ class BeerCard2 extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Image.asset(
-              'assets/magpie_logo.png', // 이미지 에셋 추가
+              'assets/samplebeerimg.jpg', // 이미지 에셋 추가
               height: 100,
             ),
             SizedBox(height: 8.0),
