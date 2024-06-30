@@ -1,3 +1,6 @@
+import 'package:bevvy/comm/api_call.dart';
+import 'package:bevvy/comm/login_service.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -14,13 +17,20 @@ import 'user_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Flutter 엔진 초기화
   await initializeFirebase(); // Firebase 초기화
-  runApp(
-    ChangeNotifierProvider(
+  runApp(MultiProvider(
+    providers: [
       // 상태 관리를 위한 Provider를 설정합니다.
-      create: (context) => AppState(), // AppState 클래스의 인스턴스를 생성하여 Provider에 전달
-      child: MyApp(), // MyApp 위젯을 최상위 위젯으로 설정
-    ),
-  );
+      ChangeNotifierProvider(create: (context) => AppState()),
+      ChangeNotifierProvider(create: (context) => LoginService()),
+      ChangeNotifierProxyProvider<LoginService, ApiCallService>(
+          create: (context) => ApiCallService(Dio()),
+          update: (context, loginService, apiCallService) {
+            apiCallService!.setAccessToken(loginService.accessToken);
+            return apiCallService;
+          }),
+    ],
+    child: MyApp(),
+  ));
 }
 
 // Firebase 초기화 메서드
