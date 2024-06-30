@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'next_screen.dart'; // next_screen.dart 파일을 import합니다.
+import 'next_screen.dart';
 import 'recommend.dart';
 import 'mypage.dart';
 
@@ -14,6 +14,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
   final List<Widget> _screens = [
     NextScreen(key: PageStorageKey('NextScreen')),
     BeerRecommendationScreen(key: PageStorageKey('BeerRecommendationScreen')),
+    MyPage(key: PageStorageKey('MyPage')),
     // 추가 화면을 여기에 추가
   ]; // 각 인덱스에 해당하는 화면 목록
 
@@ -25,26 +26,34 @@ class _BottomNavigationState extends State<BottomNavigation> {
 
     switch (index) {
       case 0:
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => NextScreen()));
+        _navigateWithoutAnimation(NextScreen());
         break;
       case 1:
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-                builder: (context) => BeerRecommendationScreen()));
+        _navigateWithoutAnimation(BeerRecommendationScreen());
         break;
       case 3:
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => MyPage()));
+        _navigateWithoutAnimation(MyPage());
         break;
       // 기타 케이스 추가
     }
   }
 
+  void _navigateWithoutAnimation(Widget screen) {
+    Navigator.pushAndRemoveUntil(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation1, animation2) => screen,
+        transitionDuration: Duration.zero, // 애니메이션 시간 설정 (없음)
+        reverseTransitionDuration: Duration.zero, // 역방향 애니메이션 시간 설정 (없음)
+      ),
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor, // 배경색 설정
       selectedItemColor: Colors.white, // 선택된 아이템의 색상을 흰색으로 설정
       unselectedItemColor: Colors.grey, // 선택되지 않은 아이템의 색상을 회색으로 설정
       items: <BottomNavigationBarItem>[
@@ -56,6 +65,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
       ],
       currentIndex: _selectedIndex,
       onTap: _onItemTapped,
+      type: BottomNavigationBarType.fixed, // 모든 아이템을 고정된 방식으로 표시
     );
   }
 }

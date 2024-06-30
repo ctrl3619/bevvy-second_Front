@@ -9,7 +9,7 @@ class BeerRecommendationScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('상훈님을 위한 베비의 맥주 추천'),
-        backgroundColor: Colors.black,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
       body: Column(
         children: [

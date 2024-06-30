@@ -8,9 +8,12 @@ class OnboardingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -23,10 +26,9 @@ class OnboardingScreen extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 40),
               Wrap(
                 spacing: 8.0,
-                runSpacing: 8.0,
                 children: _buildChoiceChips(context, appState),
               ),
               Spacer(),
@@ -38,10 +40,14 @@ class OnboardingScreen extends StatelessWidget {
                           // AppState의 completeOnboarding 메서드를 호출하여 온보딩 완료 상태를 업데이트
                           Provider.of<AppState>(context, listen: false)
                               .completeOnboarding();
-                          Navigator.push(
+                          Navigator.pushReplacement(
                             context,
-                            MaterialPageRoute(
-                                builder: (context) => NextOnboardingScreen()),
+                            PageRouteBuilder(
+                              pageBuilder: (context, animation1, animation2) =>
+                                  NextOnboardingScreen(),
+                              transitionDuration: Duration.zero,
+                              reverseTransitionDuration: Duration.zero,
+                            ),
                           );
                         }
                       : null,
@@ -50,10 +56,11 @@ class OnboardingScreen extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30.0),
                     ),
+                    minimumSize: Size(double.infinity, 48),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    child: Text('다음', style: TextStyle(fontSize: 18)),
+                    child: Text('다음', style: TextStyle(fontSize: 14)),
                   ),
                 ),
               ),
@@ -66,18 +73,18 @@ class OnboardingScreen extends StatelessWidget {
 
   List<Widget> _buildChoiceChips(BuildContext context, AppState appState) {
     List<String> tastes = [
-      '담백',
+      '단맛',
       '강한 탄산',
-      '시트러스함',
-      '구운향',
+      '시트러스향',
+      '곡물향',
       '쓴맛',
-      '노을 양조',
-      '케미함',
-      '청량함',
-      '짠맛',
-      '건마트',
+      '알콜향',
+      '커피향',
+      '초콜릿',
+      '꽃향',
+      '견과류',
       '스모키',
-      '청담함'
+      '청량함'
     ];
     return tastes.map((taste) {
       return ChoiceChip(
@@ -86,7 +93,7 @@ class OnboardingScreen extends StatelessWidget {
         onSelected: (bool selected) {
           appState.toggleTaste(taste);
         },
-        backgroundColor: Colors.grey[800],
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         selectedColor: Colors.blue,
         labelStyle: TextStyle(
           color: appState.selectedTastes.contains(taste)
