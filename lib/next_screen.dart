@@ -28,6 +28,7 @@ class NextScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18,
                       color: Colors.white,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   SizedBox(height: 16),
@@ -53,12 +54,23 @@ class NextScreen extends StatelessWidget {
               ),
             ),
             SizedBox(height: 32),
-            Text(
-              "베비 인기 맥주",
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.white,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "베비 인기 맥주",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ],
             ),
             SizedBox(height: 16),
             SingleChildScrollView(
@@ -75,16 +87,47 @@ class NextScreen extends StatelessWidget {
                     beerName: '페일 에일',
                     rate: '⭐ 4.3',
                   ),
+                  PopularBeer(
+                    imageUrl: 'https://via.placeholder.com/150',
+                    beerName: 'IPA',
+                    rate: '⭐ 4.5',
+                  ),
+                  PopularBeer(
+                    imageUrl: 'https://via.placeholder.com/150',
+                    beerName: '스타우트',
+                    rate: '⭐ 4.2',
+                  ),
+                  PopularBeer(
+                    imageUrl: 'https://via.placeholder.com/150',
+                    beerName: '필스너',
+                    rate: '⭐ 4.1',
+                  ),
+                  PopularBeer(
+                    imageUrl: 'https://via.placeholder.com/150',
+                    beerName: '에일',
+                    rate: '⭐ 4.0',
+                  ),
                 ],
               ),
             ),
             SizedBox(height: 32),
-            Text(
-              "요즘 핫한 수제맥주 펍",
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.white,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "요즘 핫한 수제맥주 펍",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ],
             ),
             SizedBox(height: 16),
             SingleChildScrollView(
@@ -92,13 +135,13 @@ class NextScreen extends StatelessWidget {
               child: Row(
                 children: [
                   PopularPub(
-                    imageUrl: 'https://via.placeholder.com/150',
+                    imageUrl: 'http://via.placeholder.com/260x162',
                     name: '아톤 브루어리',
                     location: '성수동',
                     destination: 'A', // 이동할 화면 경로 지정
                   ),
                   PopularPub(
-                    imageUrl: 'https://via.placeholder.com/150',
+                    imageUrl: 'http://via.placeholder.com/260x162',
                     name: '상상 수제맥주 전문점',
                     location: '상상동',
                     destination: 'B', // 이동할 화면 경로 지정
@@ -111,42 +154,6 @@ class NextScreen extends StatelessWidget {
       ),
       //공통 바텀네비게이션 호출
       bottomNavigationBar: BottomNavigation(),
-    );
-  }
-}
-
-class PopularPub extends StatelessWidget {
-  final String imageUrl;
-  final String name;
-  final String location;
-  final String destination; // 이동할 화면 경로
-
-  const PopularPub(
-      {required this.imageUrl,
-      required this.name,
-      required this.location,
-      required this.destination});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        // 이동할 화면으로 이동하는 코드 작성
-        Navigator.pushNamed(context, destination);
-      },
-      child: Container(
-        width: 150,
-        margin: EdgeInsets.only(right: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Image.network(imageUrl, height: 150, width: 150, fit: BoxFit.cover),
-            SizedBox(height: 8),
-            Text(name, style: TextStyle(color: Colors.white)),
-            Text(location, style: TextStyle(color: Colors.grey)),
-          ],
-        ),
-      ),
     );
   }
 }
@@ -172,15 +179,70 @@ class PopularBeer extends StatelessWidget {
         );
       },
       child: Container(
-        width: 150,
+        margin: EdgeInsets.only(right: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(imageUrl,
+                  height: 156, width: 118, fit: BoxFit.cover),
+            ),
+            SizedBox(height: 8),
+            Text(beerName, style: TextStyle(color: Colors.white)),
+            Text(rate, style: TextStyle(color: Colors.grey)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class PopularPub extends StatelessWidget {
+  final String imageUrl;
+  final String name;
+  final String location;
+  final String destination; // 이동할 화면 경로
+
+  const PopularPub(
+      {required this.imageUrl,
+      required this.name,
+      required this.location,
+      required this.destination});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        // 이동할 화면으로 이동하는 코드 작성
+        Navigator.pushNamed(context, destination);
+      },
+      child: Container(
+        width: 260,
         margin: EdgeInsets.only(right: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.network(imageUrl, height: 150, width: 150, fit: BoxFit.cover),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(imageUrl,
+                  height: 162, width: 260, fit: BoxFit.cover),
+            ),
             SizedBox(height: 8),
-            Text(beerName, style: TextStyle(color: Colors.white)),
-            Text(rate, style: TextStyle(color: Colors.grey)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Text(name, style: TextStyle(color: Colors.white)),
+                Row(
+                  children: [
+                    Icon(Icons.location_on, color: Colors.grey, size: 16),
+                    SizedBox(width: 4),
+                    Text(location, style: TextStyle(color: Colors.grey)),
+                  ],
+                ),
+              ],
+            ),
           ],
         ),
       ),
