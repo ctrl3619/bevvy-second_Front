@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'beerdetail_screen.dart';
 import 'bottom_navigation.dart';
 
 class NextScreen extends StatelessWidget {
@@ -63,7 +64,18 @@ class NextScreen extends StatelessWidget {
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
-                children: [],
+                children: [
+                  PopularBeer(
+                    imageUrl: 'https://via.placeholder.com/150',
+                    beerName: '페일 에일',
+                    rate: '⭐ 4.4',
+                  ),
+                  PopularBeer(
+                    imageUrl: 'https://via.placeholder.com/150',
+                    beerName: '페일 에일',
+                    rate: '⭐ 4.3',
+                  ),
+                ],
               ),
             ),
             SizedBox(height: 32),
@@ -79,15 +91,17 @@ class NextScreen extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  PubCard(
+                  PopularPub(
                     imageUrl: 'https://via.placeholder.com/150',
                     name: '아톤 브루어리',
                     location: '성수동',
+                    destination: 'A', // 이동할 화면 경로 지정
                   ),
-                  PubCard(
+                  PopularPub(
                     imageUrl: 'https://via.placeholder.com/150',
                     name: '상상 수제맥주 전문점',
                     location: '상상동',
+                    destination: 'B', // 이동할 화면 경로 지정
                   ),
                 ],
               ),
@@ -101,26 +115,74 @@ class NextScreen extends StatelessWidget {
   }
 }
 
-class PubCard extends StatelessWidget {
+class PopularPub extends StatelessWidget {
   final String imageUrl;
   final String name;
   final String location;
+  final String destination; // 이동할 화면 경로
 
-  PubCard({required this.imageUrl, required this.name, required this.location});
+  const PopularPub(
+      {required this.imageUrl,
+      required this.name,
+      required this.location,
+      required this.destination});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 150,
-      margin: EdgeInsets.only(right: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Image.network(imageUrl, height: 150, width: 150, fit: BoxFit.cover),
-          SizedBox(height: 8),
-          Text(name, style: TextStyle(color: Colors.white)),
-          Text(location, style: TextStyle(color: Colors.grey)),
-        ],
+    return GestureDetector(
+      onTap: () {
+        // 이동할 화면으로 이동하는 코드 작성
+        Navigator.pushNamed(context, destination);
+      },
+      child: Container(
+        width: 150,
+        margin: EdgeInsets.only(right: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Image.network(imageUrl, height: 150, width: 150, fit: BoxFit.cover),
+            SizedBox(height: 8),
+            Text(name, style: TextStyle(color: Colors.white)),
+            Text(location, style: TextStyle(color: Colors.grey)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class PopularBeer extends StatelessWidget {
+  final String imageUrl;
+  final String beerName;
+  final String rate;
+
+  const PopularBeer(
+      {required this.imageUrl, required this.beerName, required this.rate});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        // 이동할 화면으로 이동하는 코드 작성
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BeerDetailScreen(beerName: beerName),
+          ),
+        );
+      },
+      child: Container(
+        width: 150,
+        margin: EdgeInsets.only(right: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Image.network(imageUrl, height: 150, width: 150, fit: BoxFit.cover),
+            SizedBox(height: 8),
+            Text(beerName, style: TextStyle(color: Colors.white)),
+            Text(rate, style: TextStyle(color: Colors.grey)),
+          ],
+        ),
       ),
     );
   }

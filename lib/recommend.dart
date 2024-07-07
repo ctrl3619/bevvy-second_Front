@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'beerdetail_screen.dart';
 import 'bottom_navigation.dart';
 
 class BeerRecommendationScreen extends StatelessWidget {
@@ -17,7 +18,19 @@ class BeerRecommendationScreen extends StatelessWidget {
             child: ListView(
               padding: EdgeInsets.all(16.0),
               children: [
-                BeerCard2(),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BeerDetailScreen(
+                          beerName: '페일 에일',
+                        ),
+                      ),
+                    );
+                  },
+                  child: BeerCard2(),
+                ),
                 // 필요한 경우 추가 BeerCards를 추가합니다
               ],
             ),
@@ -31,6 +44,8 @@ class BeerRecommendationScreen extends StatelessWidget {
 }
 
 class BeerCard2 extends StatelessWidget {
+  const BeerCard2({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Card(

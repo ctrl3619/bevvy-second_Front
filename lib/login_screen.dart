@@ -8,8 +8,9 @@ import 'user_service.dart';
 
 class LoginScreen extends StatelessWidget {
   final FirebaseAuth _auth = FirebaseAuth.instance; // Firebase 인증 인스턴스를 생성합니다.
-  final GoogleSignIn _googleSignIn =
-      GoogleSignIn(); // GoogleSignIn 인스턴스를 생성합니다.
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  LoginScreen({super.key}); // GoogleSignIn 인스턴스를 생성합니다.
 
   // Google을 통한 로그인 메서드
   Future<User?> _signInWithGoogle() async {
