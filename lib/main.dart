@@ -35,6 +35,8 @@ Future<void> initializeFirebase() async {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -55,6 +57,8 @@ class MyApp extends StatelessWidget {
 
 // LandingPage 클래스: 초기 화면을 구성하는 StatefulWidget
 class LandingPage extends StatefulWidget {
+  const LandingPage({super.key});
+
   @override
   _LandingPageState createState() => _LandingPageState();
 }

@@ -4,6 +4,8 @@ import 'app_state.dart';
 import 'next_onboarding_screen.dart';
 
 class OnboardingScreen extends StatelessWidget {
+  const OnboardingScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'bottom_navigation.dart';
+import 'beerdetail_screen.dart';
 
 class Beer {
   final String name;
@@ -169,8 +170,8 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
             child: TabBarView(
               controller: _tabController,
               children: [
-                _buildBeerList(ratedBeers),
-                _buildBeerList(savedBeers),
+                _buildBeerList(ratedBeers, context),
+                _buildBeerList(savedBeers, context),
               ],
             ),
           ),
@@ -180,31 +181,7 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
     );
   }
 
-  Widget _buildProfileStat(
-      String title, String count, bool isSelected, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        children: [
-          Text(
-            title,
-            style: TextStyle(color: isSelected ? Colors.white : Colors.grey),
-          ),
-          SizedBox(height: 5),
-          Text(
-            count,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBeerList(List<Beer> beers) {
+  Widget _buildBeerList(List<Beer> beers, BuildContext context) {
     return ListView.builder(
       itemCount: beers.length, // 맥주 항목의 개수
       itemBuilder: (context, index) {
@@ -224,6 +201,16 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
               ),
             ],
           ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => BeerDetailScreen(
+                  beerName: beers[index].name,
+                ),
+              ),
+            );
+          },
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
