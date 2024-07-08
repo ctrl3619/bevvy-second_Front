@@ -1,14 +1,20 @@
+import 'package:bevvy/comm/api_call.dart';
+import 'package:bevvy/enumeration/tasty_type.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'app_state.dart';
 import 'next_onboarding_screen.dart';
 
-class OnboardingScreen extends StatelessWidget {
-  const OnboardingScreen({super.key});
+class OnboardingScreen extends StatefulWidget {
+  @override
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
+}
 
+class _OnboardingScreenState extends State<OnboardingScreen> {
+  List<String> selectedType = [];
   @override
   Widget build(BuildContext context) {
-    final appState = Provider.of<AppState>(context);
+    final apiCallService = Provider.of<ApiCallService>(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -31,17 +37,21 @@ class OnboardingScreen extends StatelessWidget {
               SizedBox(height: 40),
               Wrap(
                 spacing: 8.0,
-                children: _buildChoiceChips(context, appState),
+                runSpacing: 8.0,
+                children: _buildChoiceChips(context),
               ),
               Spacer(),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: appState.selectedTastes.isNotEmpty
-                      ? () {
+                  onPressed: selectedType.isNotEmpty
+                      ? () async {
                           // AppState의 completeOnboarding 메서드를 호출하여 온보딩 완료 상태를 업데이트
                           Provider.of<AppState>(context, listen: false)
                               .completeOnboarding();
+                          final response = await apiCallService.dio.post(
+                              '/v1/user/tasty',
+                              data: {"tastyTypeList": selectedType});
                           Navigator.pushReplacement(
                             context,
                             PageRouteBuilder(
@@ -73,34 +83,27 @@ class OnboardingScreen extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildChoiceChips(BuildContext context, AppState appState) {
-    List<String> tastes = [
-      '단맛',
-      '강한 탄산',
-      '시트러스향',
-      '곡물향',
-      '쓴맛',
-      '알콜향',
-      '커피향',
-      '초콜릿',
-      '꽃향',
-      '견과류',
-      '스모키',
-      '청량함'
-    ];
-    return tastes.map((taste) {
+  List<Widget> _buildChoiceChips(BuildContext context) {
+    List<TastyType> tastyType = TastyTypeExtension.valuesList;
+    Map<TastyType, String> tastyDescription = TastyTypeExtension.descriptions;
+
+    return tastyType.map((taste) {
       return ChoiceChip(
-        label: Text(taste),
-        selected: appState.selectedTastes.contains(taste),
+        label: Text(tastyDescription[taste]!),
+        selected: selectedType.contains(taste.name),
         onSelected: (bool selected) {
-          appState.toggleTaste(taste);
+          setState(() {
+            if (selected) {
+              selectedType.add(taste.name);
+            } else {
+              selectedType.remove(taste.name);
+            }
+          });
         },
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         selectedColor: Colors.blue,
         labelStyle: TextStyle(
-          color: appState.selectedTastes.contains(taste)
-              ? Colors.white
-              : Colors.grey,
+          color: selectedType.contains(taste.name) ? Colors.white : Colors.grey,
         ),
       );
     }).toList();
