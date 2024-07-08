@@ -45,6 +45,8 @@ Future<void> initializeFirebase() async {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -52,6 +54,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         brightness: Brightness.dark,
         primarySwatch: Colors.blueGrey,
+        scaffoldBackgroundColor: Color(0xFF2A282D), // 다크 모드 배경색 설정
         textTheme: GoogleFonts.notoSansTextTheme(
           // Google Fonts의 Noto Sans 글꼴을 텍스트 테마로 설정
           Theme.of(context).textTheme, // 현재 테마의 텍스트 테마를 기반으로 설정
@@ -64,6 +67,8 @@ class MyApp extends StatelessWidget {
 
 // LandingPage 클래스: 초기 화면을 구성하는 StatefulWidget
 class LandingPage extends StatefulWidget {
+  const LandingPage({super.key});
+
   @override
   _LandingPageState createState() => _LandingPageState();
 }

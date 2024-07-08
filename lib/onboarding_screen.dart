@@ -16,9 +16,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     final apiCallService = Provider.of<ApiCallService>(context);
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -31,7 +34,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 40),
               Wrap(
                 spacing: 8.0,
                 runSpacing: 8.0,
@@ -49,10 +52,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           final response = await apiCallService.dio.post(
                               '/v1/user/tasty',
                               data: {"tastyTypeList": selectedType});
-                          Navigator.push(
+                          Navigator.pushReplacement(
                             context,
-                            MaterialPageRoute(
-                                builder: (context) => NextOnboardingScreen()),
+                            PageRouteBuilder(
+                              pageBuilder: (context, animation1, animation2) =>
+                                  NextOnboardingScreen(),
+                              transitionDuration: Duration.zero,
+                              reverseTransitionDuration: Duration.zero,
+                            ),
                           );
                         }
                       : null,
@@ -61,10 +68,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30.0),
                     ),
+                    minimumSize: Size(double.infinity, 48),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    child: Text('다음', style: TextStyle(fontSize: 18)),
+                    child: Text('다음', style: TextStyle(fontSize: 14)),
                   ),
                 ),
               ),
@@ -92,7 +100,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             }
           });
         },
-        backgroundColor: Colors.grey[800],
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         selectedColor: Colors.blue,
         labelStyle: TextStyle(
           color: selectedType.contains(taste.name) ? Colors.white : Colors.grey,
