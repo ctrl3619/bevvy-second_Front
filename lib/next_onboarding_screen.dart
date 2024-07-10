@@ -6,8 +6,44 @@ import 'beer_card.dart';
 import 'next_screen.dart';
 import 'onboarding_screen.dart';
 
-class NextOnboardingScreen extends StatelessWidget {
+class NextOnboardingScreen extends StatefulWidget {
   const NextOnboardingScreen({super.key});
+
+  @override
+  State<NextOnboardingScreen> createState() => _NextOnboardingScreenState();
+}
+
+class _NextOnboardingScreenState extends State<NextOnboardingScreen> {
+  List<Map<String, dynamic>> beers = [];
+  List<double> ratings = [];
+  int totalBeers = 0;
+  @override
+  void initState() {
+    super.initState();
+    fetchBeers(0, 5);
+  }
+
+  Future<void> fetchBeers(int page, int size) async {
+    final apiCallService = Provider.of<ApiCallService>(context, listen: false);
+    final response = await apiCallService.dio
+        .get('/v1/beer/list', queryParameters: {'page': page, 'size': size});
+    if (response.statusCode == 200) {
+      final data = response.data;
+      setState(() {
+        beers = List<Map<String, dynamic>>.from(data['data']['beerList']);
+        totalBeers = data['data']['total'];
+        ratings = List.filled(beers.length, 0);
+      });
+    } else {
+      print("Failed to load beers");
+    }
+  }
+
+  void rateBeer(int index, double rating) {
+    setState(() {
+      ratings[index] = rating;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,14 +95,15 @@ class NextOnboardingScreen extends StatelessWidget {
             Expanded(
               child: PageView.builder(
                 controller: pageController,
-                itemCount: appState.totalBeers,
+                itemCount: beers.length,
                 itemBuilder: (context, index) {
                   return BeerCard(
                     beerIndex: index,
-                    rating: appState.ratings[index],
+                    beer: beers[index],
+                    rating: ratings[index],
                     onRatingUpdate: (rating) {
-                      appState.rateBeer(index, rating);
-                      if (rating > 0 && index < appState.totalBeers - 1) {
+                      rateBeer(index, rating);
+                      if (rating > 0 && index < beers.length - 1) {
                         pageController.nextPage(
                           duration: Duration(milliseconds: 300),
                           curve: Curves.easeInOut,
