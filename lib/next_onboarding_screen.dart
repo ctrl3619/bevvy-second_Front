@@ -13,14 +13,28 @@ class NextOnboardingScreen extends StatefulWidget {
   State<NextOnboardingScreen> createState() => _NextOnboardingScreenState();
 }
 
+List<Map<String, dynamic>> createBeerList(Map<String, double> triedBeers) {
+  return triedBeers.entries.map((entry) {
+    return {
+      "beerId": int.parse(entry.key), // beerId
+      "rating": entry.value, // rating
+    };
+  }).toList();
+}
+
 class _NextOnboardingScreenState extends State<NextOnboardingScreen> {
   List<Map<String, dynamic>> beers = [];
   List<double> ratings = [];
+  Map<String, double> triedBeers = {};
+
+  int currentPage = 0;
   int totalBeers = 0;
+  int minBeerRating = 5;
+
   @override
   void initState() {
     super.initState();
-    fetchBeers(0, 5);
+    fetchBeers(currentPage, 5);
   }
 
   Future<void> fetchBeers(int page, int size) async {
@@ -30,17 +44,28 @@ class _NextOnboardingScreenState extends State<NextOnboardingScreen> {
     if (response.statusCode == 200) {
       final data = response.data;
       setState(() {
-        beers = List<Map<String, dynamic>>.from(data['data']['beerList']);
+        final newBeers =
+            List<Map<String, dynamic>>.from(data['data']['beerList']);
+        beers.addAll(newBeers);
+        ratings.addAll(List.filled(newBeers.length, 0));
         totalBeers = data['data']['total'];
-        ratings = List.filled(beers.length, 0);
       });
     } else {
       print("Failed to load beers");
     }
   }
 
-  void rateBeer(int index, double rating) {
+  void onPageChanged(int index) {
+    // 마지막 카드에 도달했을 때
+    if (index == beers.length - 1 && (currentPage + 1) * 5 < totalBeers) {
+      currentPage++; // 페이지 증가
+      fetchBeers(currentPage, 5); // 다음 맥주 불러오기
+    }
+  }
+
+  void rateBeer(int index, double rating, String beerId) {
     setState(() {
+      triedBeers[beerId] = rating;
       ratings[index] = rating;
     });
   }
@@ -70,8 +95,7 @@ class _NextOnboardingScreenState extends State<NextOnboardingScreen> {
             padding: EdgeInsets.all(8.0),
             child: CircleAvatar(
               backgroundColor: Colors.blueAccent,
-              child: Text(
-                  "${appState.ratings.where((rating) => rating > 0).length}/${appState.totalBeers}"),
+              child: Text("${triedBeers.length}/${minBeerRating}"),
             ),
           ),
         ],
@@ -96,13 +120,14 @@ class _NextOnboardingScreenState extends State<NextOnboardingScreen> {
               child: PageView.builder(
                 controller: pageController,
                 itemCount: beers.length,
+                onPageChanged: onPageChanged,
                 itemBuilder: (context, index) {
                   return BeerCard(
                     beerIndex: index,
                     beer: beers[index],
                     rating: ratings[index],
                     onRatingUpdate: (rating) {
-                      rateBeer(index, rating);
+                      rateBeer(index, rating, beers[index]['beerId']);
                       if (rating > 0 && index < beers.length - 1) {
                         pageController.nextPage(
                           duration: Duration(milliseconds: 300),
@@ -115,17 +140,18 @@ class _NextOnboardingScreenState extends State<NextOnboardingScreen> {
                 },
               ),
             ),
-            if (appState.ratings.where((rating) => rating > 0).length ==
-                appState.totalBeers)
+            if (triedBeers.length >= 5)
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: ElevatedButton(
                   onPressed: () async {
                     final response = await apiCallService.dio
                         .put('/v1/user/first', data: {"userFirst": true});
-                    // AppState의 completeNextOnboarding 메서드를 호출하여 온보딩 완료 상태를 업데이트
-                    Provider.of<AppState>(context, listen: false)
-                        .completeNextOnboarding();
+
+                    final response2 = await apiCallService.dio.post(
+                        '/v1/user/rating/beers',
+                        data: {"beerList": createBeerList(triedBeers)});
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => NextScreen()),
