@@ -10,28 +10,9 @@ import 'onboarding_screen.dart';
 import 'user_service.dart';
 
 class LoginScreen extends StatelessWidget {
-  final FirebaseAuth _auth = FirebaseAuth.instance; // Firebase 인증 인스턴스를 생성합니다.
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
-
-  LoginScreen({super.key}); // GoogleSignIn 인스턴스를 생성합니다.
-
-  // Google을 통한 로그인 메서드
-  Future<User?> _signInWithGoogle() async {
-    final GoogleSignInAccount? googleUser =
-        await _googleSignIn.signIn(); // 사용자에게 Google 로그인 창을 띄웁니다.
-    if (googleUser == null) {
-      return null; // 사용자가 로그인 취소
-    }
-    final GoogleSignInAuthentication googleAuth =
-        await googleUser.authentication; // Google 로그인 인증 정보를 가져옵니다.
-    final AuthCredential credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    ); // Firebase 인증 자격 증명을 생성합니다.
-    final UserCredential userCredential = await _auth
-        .signInWithCredential(credential); // Firebase에 자격 증명을 사용해 로그인합니다.
-    return userCredential.user; // 로그인한 사용자를 반환합니다.
-  }
+  // final FirebaseAuth _auth = FirebaseAuth.instance; // Firebase 인증 인스턴스를 생성합니다.
+  // final GoogleSignIn _googleSignIn = GoogleSignIn();
+  // LoginScreen({super.key}); // GoogleSignIn 인스턴스를 생성합니다.
 
   // 로그인 후 사용자 상태를 확인하고 적절한 화면으로 이동하는 메서드
   @override

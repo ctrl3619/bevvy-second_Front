@@ -4,6 +4,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 // BeerCard 클래스 정의 - StatelessWidget을 상속받아 상태가 없는 위젯을 생성
 class BeerCard extends StatelessWidget {
   final int beerIndex; // 맥주의 인덱스를 나타내는 변수
+  final Map<String, dynamic> beer;
   final double rating; // 맥주의 초기 평점을 나타내는 변수
   final Function(double) onRatingUpdate; // 평점 업데이트 시 호출되는 콜백 함수
   final PageController pageController; // 페이지 컨트롤러를 추가
@@ -11,6 +12,7 @@ class BeerCard extends StatelessWidget {
   // BeerCard 클래스의 생성자 - 필수 파라미터들을 받아서 초기화
   BeerCard({
     required this.beerIndex,
+    required this.beer,
     required this.rating,
     required this.onRatingUpdate,
     required this.pageController, // 페이지 컨트롤러를 받는 파라미터 추가
@@ -28,19 +30,22 @@ class BeerCard extends StatelessWidget {
         children: [
           // 네트워크 이미지 로드 - 맥주 이미지 표시
           Image.network(
-            'https://via.placeholder.com/150', // 실제 개발에서는 여기에 맥주 이미지 URL을 넣어야 합니다.
-            height: 200,
+            beer['beerImageUrl'], // 실제 개발에서는 여기에 맥주 이미지 URL을 넣어야 합니다.
+            height: 300,
             width: double.infinity,
             fit: BoxFit.cover, // 이미지의 비율을 유지하면서 카드의 전체 너비를 채우도록 설정
           ),
           // 텍스트 - 맥주 이름 및 인덱스 표시
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              '맥주 이름 ${beerIndex + 1}', // 실제 개발에서는 맥주의 이름으로 바꿔야 합니다.
-              style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+          SizedBox(height: 16.0),
+          Text(
+            beer['beerName'],
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
             ),
           ),
+          SizedBox(height: 16.0),
           // RatingBar.builder - 평점 바 생성
           RatingBar.builder(
             initialRating: rating, // 초기 평점 설정
