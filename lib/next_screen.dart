@@ -1,9 +1,86 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'beerdetail_screen.dart';
 import 'bottom_navigation.dart';
+import 'package:bevvy/comm/api_call.dart';
 
-class NextScreen extends StatelessWidget {
+class NextScreen extends StatefulWidget {
   const NextScreen({super.key});
+
+  @override
+  _NextScreenState createState() => _NextScreenState();
+}
+
+class _NextScreenState extends State<NextScreen> {
+  List<dynamic> recommendedBeers = [];
+  List<dynamic> recommendedPubs = [];
+  bool isLoadingBeers = true;
+  bool isLoadingPubs = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchRecommendedBeers();
+    fetchRecommendedPubs();
+  }
+
+  Future<void> fetchRecommendedBeers() async {
+    final apiCallService = Provider.of<ApiCallService>(context, listen: false);
+    try {
+      final response = await apiCallService.dio
+          .get('/v1/beer/recommend', queryParameters: {'page': 0, 'size': 5});
+
+      print("PopularBeer Response status: ${response.statusCode}");
+      print("PopularBeer Response message: ${response.data['message']}");
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        setState(() {
+          recommendedBeers = data['data']['recommendBeerList'];
+          isLoadingBeers = false;
+        });
+      } else {
+        print("Failed to load recommended beers: ${response.statusCode}");
+        setState(() {
+          isLoadingBeers = false;
+        });
+      }
+    } catch (e) {
+      print("An error occurred: $e");
+      setState(() {
+        isLoadingBeers = false;
+      });
+    }
+  }
+
+  Future<void> fetchRecommendedPubs() async {
+    final apiCallService = Provider.of<ApiCallService>(context, listen: false);
+    try {
+      final response = await apiCallService.dio
+          .get('/v1/pub/recommend', queryParameters: {'page': 0, 'size': 5});
+
+      print("PopularPub Response status: ${response.statusCode}");
+      print("PopularPub Response message: ${response.data['message']}");
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        setState(() {
+          recommendedPubs = data['data']['recommendPubList'];
+          isLoadingPubs = false;
+        });
+      } else {
+        print("Failed to load recommended pubs: ${response.statusCode}");
+        setState(() {
+          isLoadingPubs = false;
+        });
+      }
+    } catch (e) {
+      print("An error occurred: $e");
+      setState(() {
+        isLoadingPubs = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,43 +150,20 @@ class NextScreen extends StatelessWidget {
               ],
             ),
             SizedBox(height: 16),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  PopularBeer(
-                    imageUrl: 'https://via.placeholder.com/150',
-                    beerName: '페일 에일',
-                    rate: '⭐ 4.4',
+            isLoadingBeers
+                ? Center(child: CircularProgressIndicator())
+                : SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: recommendedBeers.map((beer) {
+                        return PopularBeer(
+                          imageUrl: beer['beerImageUrl'],
+                          beerName: beer['beerName'],
+                          rate: '⭐ ${beer['beerRating']}',
+                        );
+                      }).toList(),
+                    ),
                   ),
-                  PopularBeer(
-                    imageUrl: 'https://via.placeholder.com/150',
-                    beerName: '페일 에일',
-                    rate: '⭐ 4.3',
-                  ),
-                  PopularBeer(
-                    imageUrl: 'https://via.placeholder.com/150',
-                    beerName: 'IPA',
-                    rate: '⭐ 4.5',
-                  ),
-                  PopularBeer(
-                    imageUrl: 'https://via.placeholder.com/150',
-                    beerName: '스타우트',
-                    rate: '⭐ 4.2',
-                  ),
-                  PopularBeer(
-                    imageUrl: 'https://via.placeholder.com/150',
-                    beerName: '필스너',
-                    rate: '⭐ 4.1',
-                  ),
-                  PopularBeer(
-                    imageUrl: 'https://via.placeholder.com/150',
-                    beerName: '에일',
-                    rate: '⭐ 4.0',
-                  ),
-                ],
-              ),
-            ),
             SizedBox(height: 32),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -130,29 +184,25 @@ class NextScreen extends StatelessWidget {
               ],
             ),
             SizedBox(height: 16),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  PopularPub(
-                    imageUrl: 'http://via.placeholder.com/260x162',
-                    name: '아톤 브루어리',
-                    location: '성수동',
-                    destination: 'A', // 이동할 화면 경로 지정
+            isLoadingPubs
+                ? Center(child: CircularProgressIndicator())
+                : SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: recommendedPubs.map((pub) {
+                        return PopularPub(
+                          imageUrl: pub['imageUrl'],
+                          name: pub['name'],
+                          location: pub['location'],
+                          destination: 'A', // 이동할 화면 경로 지정 (예시)
+                        );
+                      }).toList(),
+                    ),
                   ),
-                  PopularPub(
-                    imageUrl: 'http://via.placeholder.com/260x162',
-                    name: '상상 수제맥주 전문점',
-                    location: '상상동',
-                    destination: 'B', // 이동할 화면 경로 지정
-                  ),
-                ],
-              ),
-            ),
           ],
         ),
       ),
-      //공통 바텀네비게이션 호출
+      // 공통 바텀네비게이션 호출
       bottomNavigationBar: BottomNavigation(),
     );
   }
@@ -163,8 +213,11 @@ class PopularBeer extends StatelessWidget {
   final String beerName;
   final String rate;
 
-  const PopularBeer(
-      {required this.imageUrl, required this.beerName, required this.rate});
+  const PopularBeer({
+    required this.imageUrl,
+    required this.beerName,
+    required this.rate,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -185,8 +238,12 @@ class PopularBeer extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.network(imageUrl,
-                  height: 156, width: 118, fit: BoxFit.cover),
+              child: Image.network(
+                imageUrl,
+                height: 156,
+                width: 118,
+                fit: BoxFit.cover,
+              ),
             ),
             SizedBox(height: 8),
             Text(beerName, style: TextStyle(color: Colors.white)),
@@ -204,11 +261,12 @@ class PopularPub extends StatelessWidget {
   final String location;
   final String destination; // 이동할 화면 경로
 
-  const PopularPub(
-      {required this.imageUrl,
-      required this.name,
-      required this.location,
-      required this.destination});
+  const PopularPub({
+    required this.imageUrl,
+    required this.name,
+    required this.location,
+    required this.destination,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -225,8 +283,12 @@ class PopularPub extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.network(imageUrl,
-                  height: 162, width: 260, fit: BoxFit.cover),
+              child: Image.network(
+                imageUrl,
+                height: 162,
+                width: 260,
+                fit: BoxFit.cover,
+              ),
             ),
             SizedBox(height: 8),
             Row(
