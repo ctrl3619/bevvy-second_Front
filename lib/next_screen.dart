@@ -90,130 +90,135 @@ class _NextScreenState extends State<NextScreen> {
         centerTitle: false,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         automaticallyImplyLeading: false,
+        scrolledUnderElevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Column(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Column(
+                  children: [
+                    Text(
+                      "뭘 마실지 모르겠어?\n베비가 추천해줄게",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        // 맥주 추천받기 버튼 클릭 이벤트 처리
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                      ),
+                      child: Text(
+                        "맥주 추천받기",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 32),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "뭘 마실지 모르겠어?\n베비가 추천해줄게",
-                    textAlign: TextAlign.center,
+                    "베비 인기 맥주",
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 16,
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      // 맥주 추천받기 버튼 클릭 이벤트 처리
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                    ),
-                    child: Text(
-                      "맥주 추천받기",
-                      style: TextStyle(color: Colors.black),
-                    ),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    color: Colors.white,
+                    size: 20,
                   ),
                 ],
               ),
-            ),
-            SizedBox(height: 32),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "베비 인기 맥주",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color: Colors.white,
-                  size: 20,
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            isLoadingBeers
-                ? Center(child: CircularProgressIndicator())
-                : SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: recommendedBeers.map((beer) {
-                        return PopularBeer(
-                          imageUrl: beer['beerImageUrl'],
-                          beerName: beer['beerName'],
-                          rate: '⭐ ${beer['beerRating']}',
-                        );
-                      }).toList(),
+              SizedBox(height: 16),
+              isLoadingBeers
+                  ? Center(child: CircularProgressIndicator())
+                  : SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: recommendedBeers.map((beer) {
+                          return PopularBeer(
+                            beerId: beer['beerId'].toString(), // beerId 추가
+                            imageUrl: beer['beerImageUrl'],
+                            beerName: beer['beerName'],
+                            rate: '⭐ ${beer['beerRating']}',
+                          );
+                        }).toList(),
+                      ),
+                    ),
+              SizedBox(height: 32),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "요즘 핫한 수제맥주 펍",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-            SizedBox(height: 32),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "요즘 핫한 수제맥주 펍",
-                  style: TextStyle(
-                    fontSize: 16,
+                  Icon(
+                    Icons.arrow_forward_ios,
                     color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                    size: 20,
                   ),
-                ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color: Colors.white,
-                  size: 20,
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            isLoadingPubs
-                ? Center(child: CircularProgressIndicator())
-                : SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: recommendedPubs.map((pub) {
-                        return PopularPub(
-                          imageUrl: pub['imageUrl'],
-                          name: pub['name'],
-                          location: pub['location'],
-                          destination: 'A', // 이동할 화면 경로 지정 (예시)
-                        );
-                      }).toList(),
+                ],
+              ),
+              SizedBox(height: 16),
+              isLoadingPubs
+                  ? Center(child: CircularProgressIndicator())
+                  : SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: recommendedPubs.map((pub) {
+                          return PopularPub(
+                            imageUrl: pub['imageUrl'],
+                            name: pub['name'],
+                            location: pub['location'],
+                            destination: 'A', // 이동할 화면 경로 지정 (예시)
+                          );
+                        }).toList(),
+                      ),
                     ),
-                  ),
-          ],
+            ],
+          ),
         ),
       ),
-      // 공통 바텀네비게이션 호출
       bottomNavigationBar: BottomNavigation(),
     );
   }
 }
 
 class PopularBeer extends StatelessWidget {
+  final String beerId; // beerId 필드 추가
   final String imageUrl;
   final String beerName;
   final String rate;
 
   const PopularBeer({
+    required this.beerId, // beerId 필드 추가
     required this.imageUrl,
     required this.beerName,
     required this.rate,
@@ -223,11 +228,12 @@ class PopularBeer extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // 이동할 화면으로 이동하는 코드 작성
+        print('Tapped beerId: $beerId'); //디버깅.
+        // 이동할 화면으로 이동하는 코드 수정
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => BeerDetailScreen(beerName: beerName),
+            builder: (context) => BeerDetailScreen(beerId: beerId), // beerId 전달
           ),
         );
       },
@@ -259,7 +265,7 @@ class PopularPub extends StatelessWidget {
   final String imageUrl;
   final String name;
   final String location;
-  final String destination; // 이동할 화면 경로
+  final String destination;
 
   const PopularPub({
     required this.imageUrl,
@@ -272,7 +278,6 @@ class PopularPub extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // 이동할 화면으로 이동하는 코드 작성
         Navigator.pushNamed(context, destination);
       },
       child: Container(

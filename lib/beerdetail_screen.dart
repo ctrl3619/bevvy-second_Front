@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // Provider를 사용하기 위해 추가
+import 'package:dio/dio.dart'; // API 호출을 위한 Dio 패키지
+import 'package:bevvy/comm/api_call.dart'; // ApiCallService 불러오기
 
 class BeerDetailScreen extends StatelessWidget {
-  final String beerName;
+  final String beerId; // beerId를 받도록 수정
 
-  const BeerDetailScreen({super.key, required this.beerName});
+  const BeerDetailScreen({super.key, required this.beerId});
 
   @override
   Widget build(BuildContext context) {
@@ -21,132 +24,24 @@ class BeerDetailScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 16),
-              Center(
-                child: Image.network(
-                  'https://via.placeholder.com/200', // 여기에 실제 이미지 URL을 사용하세요
-                  height: 200,
-                  width: 200,
-                  loadingBuilder: (BuildContext context, Widget child,
-                      ImageChunkEvent? loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Center(
-                      child: CircularProgressIndicator(
-                        value: loadingProgress.expectedTotalBytes != null
-                            ? loadingProgress.cumulativeBytesLoaded /
-                                (loadingProgress.expectedTotalBytes ?? 1)
-                            : null,
-                      ),
-                    );
-                  },
-                ),
-              ),
-              SizedBox(height: 16),
-              Center(
-                child: Text(
-                  beerName,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              Center(
-                child: Text(
-                  '맥파이 페일에일',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              SizedBox(height: 16),
-              Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(5, (index) {
-                    return Icon(
-                      Icons.star_border,
-                      color: Colors.white,
-                      size: 32,
-                    );
-                  }),
-                ),
-              ),
-              SizedBox(height: 8),
-              Center(
-                child: Text(
-                  '⭐ 4.4',
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              SizedBox(height: 16),
-              Text(
-                '#페일에일 #홉 #시트러스',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.white,
-                ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                '종류 : 페일에일(Pale Ale)\n국가 : 한국\n도수 : 5%',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.white,
-                ),
-              ),
-              SizedBox(height: 16),
-              Text(
-                '맥파이 페일에일은 알코올 도수가 낮고, 가벼운 맥주 스타일 중 하나입니다. 일반적으로 홉의 쓴맛이나 향이 크지 않으며, 몰트의 단맛이나 풍미가 강조됩니다. 이 스타일은 몰트의 특징을 강조하면서도 쉽게 마실 수 있는 맥주를 찾는 사람들에게 인기가 있습니다.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.white,
-                ),
-              ),
-              SizedBox(height: 16),
-              Text(
-                '평가 3',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white,
-                ),
-              ),
-              SizedBox(height: 8),
-              _buildRatingListItem(
-                context,
-                'https://via.placeholder.com/50',
-                '맥주킹 백상훈',
-                4.0,
-                '이 맥주는 제 인생 맥주입니다. 꼭 한 번 드셔보세요.',
-              ),
-              _buildRatingListItem(
-                context,
-                'https://via.placeholder.com/50',
-                '이호연',
-                3.0,
-                '그냥 그래요.',
-              ),
-              _buildRatingListItem(
-                context,
-                'https://via.placeholder.com/50',
-                '채범완',
-                4.0,
-                '존 맛',
-              ),
-            ],
-          ),
-        ),
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: _fetchBeerDetail(context, beerId), // beerId를 사용하여 맥주 상세 정보를 가져옴
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(
+                child: Text('Error: ${snapshot.error}',
+                    style: TextStyle(color: Colors.white)));
+          } else if (snapshot.hasData) {
+            final beerData = snapshot.data!; // 가져온 데이터 사용
+            return _buildBeerDetailContent(beerData);
+          } else {
+            return Center(
+                child: Text('No data found',
+                    style: TextStyle(color: Colors.white)));
+          }
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -162,46 +57,92 @@ class BeerDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRatingListItem(BuildContext context, String imageUrl,
-      String username, double rating, String comment) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          CircleAvatar(
-            backgroundImage: NetworkImage(imageUrl),
-            radius: 25,
-          ),
-          SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                username,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white,
-                ),
-              ),
-              Row(
-                children: List.generate(5, (index) {
-                  return Icon(
-                    index < rating ? Icons.star : Icons.star_border,
-                    color: Colors.white,
-                    size: 16,
+  Future<Map<String, dynamic>> _fetchBeerDetail(
+      BuildContext context, String beerId) async {
+    // beerId를 인자로 받음
+    final apiCallService = Provider.of<ApiCallService>(context, listen: false);
+
+    try {
+      final response = await apiCallService.dio.get(
+        '/v1/beer', // API 엔드포인트 수정
+        queryParameters: {'beerId': beerId}, // beerId를 쿼리 파라미터로 전달
+      );
+
+      if (response.statusCode == 200) {
+        return response.data['data']; // 맥주 데이터 반환
+      } else {
+        throw Exception('Failed to load beer details: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('An error occurred while fetching beer details: $e');
+    }
+  }
+
+  Widget _buildBeerDetailContent(Map<String, dynamic> beerData) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 16),
+            Center(
+              child: Image.network(
+                beerData['beerImageUrl'] ??
+                    'https://via.placeholder.com/200', // 서버에서 가져온 이미지 URL 사용
+                height: 200,
+                width: 200,
+                loadingBuilder: (BuildContext context, Widget child,
+                    ImageChunkEvent? loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Center(
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                              (loadingProgress.expectedTotalBytes ?? 1)
+                          : null,
+                    ),
                   );
-                }),
+                },
               ),
-              Text(
-                comment,
+            ),
+            SizedBox(height: 16),
+            Center(
+              child: Text(
+                beerData['beerName'] ?? 'Unknown Beer',
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
-            ],
-          ),
-        ],
+            ),
+            SizedBox(height: 16),
+            Text(
+              '#${beerData['beerType'] ?? ''} #홉 #시트러스',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '종류 : ${beerData['beerType'] ?? 'Unknown'}\n도수 : ${beerData['beerAlcoholDegree'] ?? 'Unknown'}%',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(height: 16),
+            Text(
+              beerData['beerInformation'] ?? 'No additional information.',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -249,7 +190,7 @@ class BeerDetailScreen extends StatelessWidget {
         TextButton(
           child: Text("등록", style: TextStyle(color: Colors.white)),
           onPressed: () {
-// 별점 등록 로직 처리
+            // 별점 등록 로직 처리
             Navigator.of(context).pop();
           },
         ),

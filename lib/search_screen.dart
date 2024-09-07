@@ -88,22 +88,11 @@ class _SearchScreenState extends State<SearchScreen> {
                         itemCount: searchResults.length,
                         itemBuilder: (context, index) {
                           final beer = searchResults[index];
-                          return _buildRecentSearchItem(
-                              context, beer['beerName']);
+                          return _buildRecentSearchItem(context,
+                              beer['beerName'], beer['beerId'].toString());
                         },
                       ),
                     ),
-
-              // Text(
-              //   '최근 검색',
-              //   style: TextStyle(color: Colors.white, fontSize: 16),
-              // ),
-              // SizedBox(height: 16),
-              // _buildRecentSearchItem(context, '인디카 IPA'),
-              // _buildRecentSearchItem(context, '대강 페일에일'),
-              // _buildRecentSearchItem(context, '\$맥주명\$'),
-              // _buildRecentSearchItem(context, '\$맥주명\$'),
-              // _buildRecentSearchItem(context, '\$맥주명\$'),
             ],
           ),
         ),
@@ -112,14 +101,14 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildRecentSearchItem(BuildContext context, String name) {
+  Widget _buildRecentSearchItem(BuildContext context, String name, String id) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => BeerDetailScreen(
-              beerName: name,
+              beerId: id, // beerId를 전달하도록 수정
             ),
           ),
         );
