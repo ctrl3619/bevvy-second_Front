@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart'; // RatingBar를 사용하기 위해 추가
 import 'package:provider/provider.dart'; // Provider를 사용하기 위해 추가
-import 'package:dio/dio.dart'; // Dio 패키지 추가
 import 'package:bevvy/comm/api_call.dart'; // ApiCallService 불러오기
 
 class BeerDetailScreen extends StatelessWidget {
@@ -83,7 +82,6 @@ class BeerDetailScreen extends StatelessWidget {
         data: {
           'beerId': int.parse(beerId), // 맥주 ID를 정수형으로 변환하여 전달
           'rating': rating,
-          'userId': 0, // 예제에서는 userId가 0으로 되어 있으므로 동일하게 설정
         },
       );
 
@@ -165,16 +163,6 @@ class BeerDetailScreen extends StatelessWidget {
               ),
             ),
             SizedBox(height: 16),
-            Center(
-              child: Text(
-                beerData['beerName'] ?? 'Unknown Beer',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
             // RatingBar 추가
             Center(
               child: RatingBar.builder(
@@ -191,6 +179,26 @@ class BeerDetailScreen extends StatelessWidget {
                   _updateBeerRating(
                       context, beerId, newRating); // 새로운 평점 업데이트 호출
                 },
+              ),
+            ),
+            SizedBox(height: 16),
+            Center(
+              child: Text(
+                beerData['beerName'] ?? 'Unknown Beer',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            Center(
+              child: Text(
+                '평균 평점 ⭐ ${beerData['beerAverageRating']?.toStringAsFixed(1) ?? '0.0'}',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.white,
+                ),
               ),
             ),
             SizedBox(height: 16),
@@ -217,9 +225,79 @@ class BeerDetailScreen extends StatelessWidget {
                 color: Colors.white,
               ),
             ),
+            SizedBox(height: 32),
+            // 댓글 섹션
+            Text(
+              '평가 3',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 16),
+            _buildCommentSection(),
           ],
         ),
       ),
+    );
+  }
+
+  // 댓글 섹션을 위한 위젯 추가
+  Widget _buildCommentSection() {
+    // 예시 댓글 데이터
+    final List<Map<String, dynamic>> comments = [
+      {
+        'username': '맥주킹 백상훈',
+        'comment': '이 맥주는 제 인생 맥주입니다. 꼭 한번 드셔보세요!',
+        'rating': 4.0,
+        'likes': 12
+      },
+      {'username': '이호연', 'comment': '그냥 그럼', 'rating': 2.0, 'likes': 3},
+      {'username': '채병완', 'comment': '존 맛', 'rating': 5.0, 'likes': 1},
+    ];
+
+    return Column(
+      children: comments.map((comment) {
+        return ListTile(
+          leading: CircleAvatar(
+            backgroundImage: AssetImage('assets/profileimg.jpg'),
+          ),
+          title: Text(
+            comment['username'],
+            style: TextStyle(color: Colors.white),
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                comment['comment'],
+                style: TextStyle(color: Colors.white),
+              ),
+              Row(
+                children: [
+                  Text(
+                    '⭐ ${comment['rating'].toStringAsFixed(1)}', // 평점을 숫자로 표시
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  SizedBox(width: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.thumb_up_alt,
+                          color: Colors.grey, size: 16), // 엄지 아이콘 추가
+                      SizedBox(width: 4), // 아이콘과 텍스트 간격
+                      Text(
+                        '${comment['likes']}',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ],
+              )
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 }
