@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'bottom_navigation.dart';
 import 'beerdetail_screen.dart';
+import 'package:bevvy/comm/api_call.dart'; // ApiCallService 불러오기
 
 class Beer {
+  final String id; // beerId 필드
   final String name;
   final String imageUrl;
   final double rating;
+  final bool wanted; // 저장 여부를 나타내는 필드
 
-  Beer({required this.name, required this.imageUrl, required this.rating});
+  Beer({
+    required this.id, // id 필드
+    required this.name,
+    required this.imageUrl,
+    required this.rating,
+    required this.wanted, // wanted 필드 추가
+  });
 }
 
 class MyPage extends StatefulWidget {
@@ -18,38 +28,8 @@ class MyPage extends StatefulWidget {
 }
 
 class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
-  List<Beer> ratedBeers = [
-    Beer(
-      name: '맥파이 페일에일',
-      imageUrl:
-          'https://i.namu.wiki/i/Pmwui0NAM_3MuT3aRD56pC3zaETg2kxsKT4pUcrDGpf89LPOe5u7pv7OQ0mzjCJZvIqyeg42T3whIksRDSRxUw.webp',
-      rating: 4.0,
-    ),
-    Beer(
-      name: '맥파이 페일에일1',
-      imageUrl:
-          'https://i.namu.wiki/i/Pmwui0NAM_3MuT3aRD56pC3zaETg2kxsKT4pUcrDGpf89LPOe5u7pv7OQ0mzjCJZvIqyeg42T3whIksRDSRxUw.webp',
-      rating: 4.0,
-    ),
-    // 더 많은 데이터 추가
-  ];
-
-  List<Beer> savedBeers = [
-    Beer(
-      name: '구스 아일랜드 IPA',
-      imageUrl:
-          'https://i.namu.wiki/i/Pmwui0NAM_3MuT3aRD56pC3zaETg2kxsKT4pUcrDGpf89LPOe5u7pv7OQ0mzjCJZvIqyeg42T3whIksRDSRxUw.webp',
-      rating: 4.5,
-    ),
-    Beer(
-      name: '칭따오',
-      imageUrl:
-          'https://i.namu.wiki/i/Pmwui0NAM_3MuT3aRD56pC3zaETg2kxsKT4pUcrDGpf89LPOe5u7pv7OQ0mzjCJZvIqyeg42T3whIksRDSRxUw.webp',
-      rating: 4.2,
-    ),
-    // 더 많은 데이터 추가
-  ];
-
+  List<Beer> ratedBeers = [];
+  List<Beer> savedBeers = [];
   late TabController _tabController;
 
   @override
@@ -57,8 +37,51 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() {
-      setState(() {}); // 탭이 변경될 때마다 UI를 업데이트하기 위해 setState 호출
+      setState(() {});
     });
+    fetchMyPageData(); // 마이페이지 데이터를 가져오는 함수 호출
+  }
+
+  Future<void> fetchMyPageData() async {
+    final apiCallService = Provider.of<ApiCallService>(context, listen: false);
+
+    try {
+      // API 호출
+      final response = await apiCallService.dio.get(
+        '/v1/user/mypage', // API 엔드포인트
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+        setState(() {
+          // API 응답 데이터를 사용하여 리스트 업데이트
+          ratedBeers = (data['triedBeerList'] as List)
+              .map((beer) => Beer(
+                    id: beer['beerId'].toString(), // beerId 추가
+                    name: beer['beerName'],
+                    imageUrl: beer['beerImageUrl'],
+                    rating:
+                        beer['selfRating'].toDouble(), // selfRating을 평점으로 저장
+                    wanted: beer['wanted'], // wanted 값 저장
+                  ))
+              .toList();
+
+          savedBeers = (data['wantedBeerList'] as List)
+              .map((beer) => Beer(
+                    id: beer['beerId'].toString(), // beerId 추가
+                    name: beer['beerName'],
+                    imageUrl: beer['beerImageUrl'],
+                    rating: beer['beerRating'].toDouble(),
+                    wanted: true, // 저장된 맥주는 wanted가 true
+                  ))
+              .toList();
+        });
+      } else {
+        print("Failed to load my page data: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("An error occurred: $e");
+    }
   }
 
   @override
@@ -73,7 +96,7 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
           SizedBox(height: 20),
           CircleAvatar(
             radius: 50,
-            backgroundImage: AssetImage('assets/profileimg.jpg'), // 이미지 경로
+            backgroundImage: AssetImage('assets/profileimg.jpg'),
           ),
           SizedBox(height: 10),
           Text(
@@ -99,7 +122,7 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
             children: [
               GestureDetector(
                 onTap: () {
-                  _tabController.animateTo(0); // 첫 번째 탭으로 이동
+                  _tabController.animateTo(0);
                 },
                 child: Column(
                   children: [
@@ -125,14 +148,14 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
                       width: 142,
                       color: _tabController.index == 0
                           ? Colors.white
-                          : Colors.transparent, // 첫 번째 탭이 선택된 경우 밑줄 표시
+                          : Colors.transparent,
                     ),
                   ],
                 ),
               ),
               GestureDetector(
                 onTap: () {
-                  _tabController.animateTo(1); // 두 번째 탭으로 이동
+                  _tabController.animateTo(1);
                 },
                 child: Column(
                   children: [
@@ -158,7 +181,7 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
                       width: 142,
                       color: _tabController.index == 1
                           ? Colors.white
-                          : Colors.transparent, // 두 번째 탭이 선택된 경우 밑줄 표시
+                          : Colors.transparent,
                     ),
                   ],
                 ),
@@ -183,10 +206,10 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
 
   Widget _buildBeerList(List<Beer> beers, BuildContext context) {
     return ListView.builder(
-      itemCount: beers.length, // 맥주 항목의 개수
+      itemCount: beers.length,
       itemBuilder: (context, index) {
         return ListTile(
-          leading: Image.network(beers[index].imageUrl, width: 50), // 맥주 이미지 경로
+          leading: Image.network(beers[index].imageUrl, width: 50),
           title: Text(
             beers[index].name,
             style: TextStyle(color: Colors.white),
@@ -206,7 +229,7 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
               context,
               MaterialPageRoute(
                 builder: (context) => BeerDetailScreen(
-                  beerName: beers[index].name,
+                  beerId: beers[index].id, // beerId를 전달하도록 수정
                 ),
               ),
             );
@@ -215,8 +238,14 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                icon: Icon(Icons.bookmark_border, color: Colors.white),
-                onPressed: () {},
+                icon: Icon(
+                    beers[index].wanted
+                        ? Icons.bookmark
+                        : Icons.bookmark_border, // 저장 여부에 따라 아이콘 변경
+                    color: Colors.white),
+                onPressed: () {
+                  // 저장 버튼 로직 추가 가능
+                },
               ),
               IconButton(
                 icon: Icon(Icons.share, color: Colors.white),

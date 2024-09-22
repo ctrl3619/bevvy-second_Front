@@ -2,12 +2,9 @@ import 'package:bevvy/comm/api_call.dart';
 import 'package:bevvy/comm/login_service.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
-import 'next_onboarding_screen.dart';
 import 'next_screen.dart';
 import 'onboarding_screen.dart';
-import 'user_service.dart';
 
 class LoginScreen extends StatelessWidget {
   // final FirebaseAuth _auth = FirebaseAuth.instance; // Firebase 인증 인스턴스를 생성합니다.
