@@ -5,16 +5,18 @@ import 'beerdetail_screen.dart';
 import 'package:bevvy/comm/api_call.dart'; // ApiCallService 불러오기
 
 class Beer {
-  final String id; // beerId 필드 추가
+  final String id; // beerId 필드
   final String name;
   final String imageUrl;
   final double rating;
+  final bool wanted; // 저장 여부를 나타내는 필드
 
   Beer({
-    required this.id, // id 필드 추가
+    required this.id, // id 필드
     required this.name,
     required this.imageUrl,
     required this.rating,
+    required this.wanted, // wanted 필드 추가
   });
 }
 
@@ -58,7 +60,9 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
                     id: beer['beerId'].toString(), // beerId 추가
                     name: beer['beerName'],
                     imageUrl: beer['beerImageUrl'],
-                    rating: beer['beerRating'].toDouble(),
+                    rating:
+                        beer['selfRating'].toDouble(), // selfRating을 평점으로 저장
+                    wanted: beer['wanted'], // wanted 값 저장
                   ))
               .toList();
 
@@ -68,6 +72,7 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
                     name: beer['beerName'],
                     imageUrl: beer['beerImageUrl'],
                     rating: beer['beerRating'].toDouble(),
+                    wanted: true, // 저장된 맥주는 wanted가 true
                   ))
               .toList();
         });
@@ -233,8 +238,14 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                icon: Icon(Icons.bookmark_border, color: Colors.white),
-                onPressed: () {},
+                icon: Icon(
+                    beers[index].wanted
+                        ? Icons.bookmark
+                        : Icons.bookmark_border, // 저장 여부에 따라 아이콘 변경
+                    color: Colors.white),
+                onPressed: () {
+                  // 저장 버튼 로직 추가 가능
+                },
               ),
               IconButton(
                 icon: Icon(Icons.share, color: Colors.white),

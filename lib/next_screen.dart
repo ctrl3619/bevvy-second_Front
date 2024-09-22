@@ -158,11 +158,20 @@ class _NextScreenState extends State<NextScreen> {
                       scrollDirection: Axis.horizontal,
                       child: Row(
                         children: recommendedBeers.map((beer) {
+                          // null 체크 후 대체 값 설정
+                          final beerId = beer['beerId']?.toString() ?? 'N/A';
+                          final beerName = beer['beerName'] ?? 'No Name';
+                          final imageUrl = beer['beerImageUrl'] ??
+                              'https://via.placeholder.com/118x156';
+                          final rating = beer['beerRating'] != null
+                              ? '⭐ ${beer['beerRating']}'
+                              : '⭐ 0';
+
                           return PopularBeer(
-                            beerId: beer['beerId'].toString(), // beerId 추가
-                            imageUrl: beer['beerImageUrl'],
-                            beerName: beer['beerName'],
-                            rate: '⭐ ${beer['beerRating']}',
+                            beerId: beerId,
+                            imageUrl: imageUrl,
+                            beerName: beerName,
+                            rate: rating,
                           );
                         }).toList(),
                       ),
