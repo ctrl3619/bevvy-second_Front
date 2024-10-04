@@ -8,10 +8,8 @@ import 'app_state.dart';
 import 'login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'next_onboarding_screen.dart';
 import 'next_screen.dart';
 import 'onboarding_screen.dart';
-import 'user_service.dart';
 
 // 애플리케이션의 진입점
 void main() async {
@@ -77,14 +75,16 @@ class _LandingPageState extends State<LandingPage> {
   @override
   void initState() {
     super.initState();
-    _checkUserStatus();
+    // [20241004] 빌드가 완료된 후에 상태를 확인하고 네비게이션 처리
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkUserStatus();
+    });
   }
 
   // 사용자 상태를 확인하고 적절한 화면으로 네비게이션하는 메서드
   Future<void> _checkUserStatus() async {
-    final userService = UserService();
-    final userStatus = await userService.getUserStatus();
     final appState = Provider.of<AppState>(context, listen: false);
+    final apiCallService = Provider.of<ApiCallService>(context, listen: false);
 
     // 로그인되지 않은 경우 로그인 화면으로 이동
     if (!appState.isLoggedIn) {
@@ -92,23 +92,38 @@ class _LandingPageState extends State<LandingPage> {
         context,
         MaterialPageRoute(builder: (context) => LoginScreen()), // 로그인 화면으로 이동
       );
+      return; // [20241004] 이후 코드를 실행하지 않도록 함
     }
-    // 다음 온보딩 완료 상태인 경우 NextScreen으로 이동
-    else if (userStatus['nextOnboardingCompleted'] == true) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => NextScreen()),
-      );
-    }
-    // 온보딩 완료 상태인 경우 NextOnboardingScreen으로 이동
-    else if (userStatus['onboardingCompleted'] == true) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => NextOnboardingScreen()),
-      );
-    }
-    // 온보딩 미완료 상태인 경우 OnboardingScreen으로 이동
-    else {
+    try {
+      // [20241004] API를 통해 firstIndicator 확인
+      final response = await apiCallService.dio.get('/v1/user/first');
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+
+        // [20241004] firstIndicator가 true인 경우 NextScreen으로 이동
+        if (data['firstIndicator'] == true) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => NextScreen()),
+          );
+        } else {
+          // [20241004] firstIndicator가 false인 경우 OnboardingScreen으로 이동
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => OnboardingScreen()),
+          );
+        }
+      } else {
+        // [20241004] API 호출 실패 시 기본적으로 OnboardingScreen으로 이동
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => OnboardingScreen()),
+        );
+      }
+    } catch (e) {
+      // [20241004] 오류 발생 시 기본적으로 OnboardingScreen으로 이동
+      print('Error fetching user status: $e');
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => OnboardingScreen()),

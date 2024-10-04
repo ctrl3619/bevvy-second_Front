@@ -1,7 +1,6 @@
 import 'package:bevvy/comm/api_call.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'app_state.dart';
 import 'beer_card.dart';
 import 'next_screen.dart';
 import 'onboarding_screen.dart';
@@ -73,7 +72,6 @@ class _NextOnboardingScreenState extends State<NextOnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final apiCallService = Provider.of<ApiCallService>(context);
-    final appState = Provider.of<AppState>(context);
     final PageController pageController =
         PageController(viewportFraction: 0.85);
     return Scaffold(
@@ -145,17 +143,39 @@ class _NextOnboardingScreenState extends State<NextOnboardingScreen> {
                 padding: const EdgeInsets.all(16.0),
                 child: ElevatedButton(
                   onPressed: () async {
-                    final response = await apiCallService.dio
-                        .put('/v1/user/first', data: {"userFirst": true});
+                    try {
+                      // [20241004] 첫 번째 API 호출: 유저의 first 상태 업데이트
+                      final response = await apiCallService.dio
+                          .put('/v1/user/first', data: {"userFirst": true});
 
-                    final response2 = await apiCallService.dio.post(
-                        '/v1/user/rating/beers',
-                        data: {"beerList": createBeerList(triedBeers)});
+                      // [20241004] 첫 번째 API 호출이 성공했는지 확인 (statusCode가 200인지 체크)
+                      if (response.statusCode == 200) {
+                        // [20241004] 첫 번째 호출 성공 시에만 두 번째 API 호출: 맥주 평가 리스트 전송
+                        final response2 = await apiCallService.dio.post(
+                            '/v1/user/rating/beers',
+                            data: {"beerList": createBeerList(triedBeers)});
 
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => NextScreen()),
-                    );
+                        // [20241004] 두 번째 API 호출 성공 여부 확인
+                        if (response2.statusCode == 200) {
+                          // [20241004] 두 번째 호출도 성공하면 화면 전환 (NextScreen으로 이동)
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => NextScreen()),
+                          );
+                        } else {
+                          // [20241004] 두 번째 API 호출 실패 시 오류 출력
+                          print('Failed to send beer ratings.');
+                        }
+                      } else {
+                        // [20241004] 첫 번째 API 호출 실패 시 오류 출력
+                        print('Failed to update user first status.');
+                      }
+                    } catch (e) {
+                      // [20241004] API 호출 중 예외 발생 시 오류 출력
+                      print(
+                          'Error updating user status or sending ratings: $e');
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     minimumSize: Size(double.infinity, 50),
