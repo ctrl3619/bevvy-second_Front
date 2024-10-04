@@ -61,11 +61,9 @@ class LoginScreen extends StatelessWidget {
                 onPressed: () async {
                   // Google 로그인을 시도합니다.
                   User? user = await loginservice.signInWithGoogle();
-                  print("로그인 성공?");
                   print(user);
                   if (user != null) {
-                    print("here");
-                    print(loginservice.accessToken);
+                    print("login accessToken : ${loginservice.accessToken}");
                     apiCallService.setAccessToken(loginservice.accessToken);
                     await checkFirstLogin(context);
                   }
