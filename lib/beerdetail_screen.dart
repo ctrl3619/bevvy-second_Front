@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart'; // RatingBar를 사용하기 위해 추가
 import 'package:provider/provider.dart'; // Provider를 사용하기 위해 추가
-import 'package:dio/dio.dart'; // Dio 패키지 추가
 import 'package:bevvy/comm/api_call.dart'; // ApiCallService 불러오기
 
 class BeerDetailScreen extends StatelessWidget {
