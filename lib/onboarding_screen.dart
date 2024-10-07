@@ -50,7 +50,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               '/v1/user/tasty',
                               data: {"tastyTypeList": selectedType},
                             );
-
                             // [20241004] 응답 상태 코드 확인
                             if (response.statusCode == 200) {
                               // [20241004] 성공적으로 데이터를 전송한 경우에만 다음 화면으로 이동

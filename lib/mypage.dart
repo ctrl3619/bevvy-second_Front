@@ -10,6 +10,7 @@ class Beer {
   final String imageUrl;
   final double rating;
   final bool wanted; // 저장 여부를 나타내는 필드
+  final bool showRating; // 레이팅 UI 표시 여부
 
   Beer({
     required this.id, // id 필드
@@ -17,6 +18,7 @@ class Beer {
     required this.imageUrl,
     required this.rating,
     required this.wanted, // wanted 필드 추가
+    this.showRating = true, // 기본값은 true
   });
 }
 
@@ -66,15 +68,24 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
                   ))
               .toList();
 
-          savedBeers = (data['wantedBeerList'] as List)
-              .map((beer) => Beer(
-                    id: beer['beerId'].toString(), // beerId 추가
-                    name: beer['beerName'],
-                    imageUrl: beer['beerImageUrl'],
-                    rating: beer['beerRating'].toDouble(),
-                    wanted: true, // 저장된 맥주는 wanted가 true
-                  ))
-              .toList();
+          // ratedBeers를 맵으로 변환하여 빠른 조회 가능하게 함
+          Map<String, Beer> ratedBeersMap = {
+            for (var beer in ratedBeers) beer.id: beer
+          };
+
+          savedBeers = (data['wantedBeerList'] as List).map((beer) {
+            String beerId = beer['beerId'].toString();
+            bool isRated = ratedBeersMap.containsKey(beerId);
+            double rating = isRated ? ratedBeersMap[beerId]!.rating : 0.0;
+            return Beer(
+              id: beerId,
+              name: beer['beerName'],
+              imageUrl: beer['beerImageUrl'],
+              rating: rating,
+              wanted: true, // 저장된 맥주는 wanted가 true
+              showRating: isRated, // 평가 여부에 따라 레이팅 표시 결정
+            );
+          }).toList();
         });
       } else {
         print("Failed to load my page data: ${response.statusCode}");
@@ -214,16 +225,18 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
             beers[index].name,
             style: TextStyle(color: Colors.white),
           ),
-          subtitle: Row(
-            children: [
-              Icon(Icons.star, color: Colors.yellow, size: 16),
-              SizedBox(width: 5),
-              Text(
-                beers[index].rating.toString(),
-                style: TextStyle(color: Colors.white),
-              ),
-            ],
-          ),
+          subtitle: beers[index].showRating
+              ? Row(
+                  children: [
+                    Icon(Icons.star, color: Colors.yellow, size: 16),
+                    SizedBox(width: 5),
+                    Text(
+                      beers[index].rating.toString(),
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ],
+                )
+              : null,
           onTap: () {
             Navigator.push(
               context,
