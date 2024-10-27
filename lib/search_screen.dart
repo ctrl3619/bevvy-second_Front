@@ -97,7 +97,7 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavigation(),
+      bottomNavigationBar: BottomNavigation(currentIndex: 2),
     );
   }
 
@@ -108,7 +108,8 @@ class _SearchScreenState extends State<SearchScreen> {
           context,
           MaterialPageRoute(
             builder: (context) => BeerDetailScreen(
-              beerId: id, // beerId를 전달하도록 수정
+              beerId: id,
+              initialSavedState: false, // 또는 API에서 제공하는 저장 상태 값
             ),
           ),
         );
