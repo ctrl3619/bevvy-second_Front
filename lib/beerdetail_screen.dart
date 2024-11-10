@@ -146,32 +146,53 @@ class _BeerDetailScreenState extends State<BeerDetailScreen> {
     }
   }
 
-  // [20241027] 맥주 평가를 업데이트하는 API 호출 메서드 추가
+  // [20241027] 맥주 평가를 업데이트하거나 제거하는 API 호출 메서드 수정
   Future<void> _updateBeerRating(
       BuildContext context, String beerId, double rating) async {
     final apiCallService = Provider.of<ApiCallService>(context, listen: false);
 
     try {
-      final response = await apiCallService.dio.post(
-        '/v1/user/rating/beer',
-        data: {
-          'beerId': int.parse(beerId),
-          'rating': rating,
-          'userId': 0, // 예시로 userId를 0으로 설정
-        },
-      );
+      if (rating == 0) {
+        // 평점이 0일 경우 평가 제거 API 호출
+        final response = await apiCallService.dio.delete(
+          '/v1/user/rating/beer',
+          queryParameters: {'beerId': int.parse(beerId)},
+        );
 
-      if (response.statusCode == 200) {
-        setState(() {
-          _hasChanges = true; // 변경 사항 표시
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('평가가 정상적으로 업데이트되었습니다.')),
-        );
+        if (response.statusCode == 200) {
+          setState(() {
+            _hasChanges = true;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('맥주 평가가 제거되었습니다.')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('평가 제거에 실패했습니다.')),
+          );
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('평가 업데이트에 실패했습니다.')),
+        // 평점이 0이 아닐 경우 기존 평가 업데이트 API 호출
+        final response = await apiCallService.dio.post(
+          '/v1/user/rating/beer',
+          data: {
+            'beerId': int.parse(beerId),
+            'rating': rating,
+          },
         );
+
+        if (response.statusCode == 200) {
+          setState(() {
+            _hasChanges = true;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('평가가 정상적으로 업데이트되었습니다.')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('평가 업데이트에 실패했습니다.')),
+          );
+        }
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

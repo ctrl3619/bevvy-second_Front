@@ -77,6 +77,7 @@ class _MyPageState extends State<MyPage>
         final data = response.data['data'];
         setState(() {
           ratedBeers = (data['triedBeerList'] as List)
+              .where((beer) => beer['selfRating'] > 0)
               .map((beer) => Beer(
                     id: beer['beerId'].toString(),
                     name: beer['beerName'],
@@ -254,7 +255,7 @@ class _MyPageState extends State<MyPage>
             ),
           ],
         ),
-        bottomNavigationBar: BottomNavigation(currentIndex: 3), // ��이페이지는 인덱스 3
+        bottomNavigationBar: BottomNavigation(currentIndex: 3), // 페이지는 인덱스 3
       ),
     );
   }
