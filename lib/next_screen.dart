@@ -215,7 +215,7 @@ class _NextScreenState extends State<NextScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavigation(),
+      bottomNavigationBar: BottomNavigation(currentIndex: 0),
     );
   }
 }
@@ -242,7 +242,10 @@ class PopularBeer extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => BeerDetailScreen(beerId: beerId), // beerId 전달
+            builder: (context) => BeerDetailScreen(
+              beerId: beerId,
+              initialSavedState: false, // 또는 API에서 제공하는 저장 상태 값
+            ),
           ),
         );
       },

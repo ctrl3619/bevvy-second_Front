@@ -1,36 +1,78 @@
 import 'package:flutter/material.dart';
 import 'bottom_navigation.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
+import 'package:provider/provider.dart'; // ApiCallService 사용하기 위해 추가
+import 'package:bevvy/comm/api_call.dart'; // ApiCallService 불러오기
 
-class BeerRecommendationScreen extends StatelessWidget {
+class BeerRecommendationScreen extends StatefulWidget {
   const BeerRecommendationScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    List<Container> cards = [
-      Container(
-        alignment: Alignment.center,
-        child: const Text('1'),
-        color: const Color.fromARGB(255, 68, 68, 68),
-      ),
-      Container(
-        alignment: Alignment.center,
-        child: const Text('2'),
-        color: const Color.fromARGB(255, 68, 68, 68),
-      ),
-      Container(
-        alignment: Alignment.center,
-        child: const Text('3'),
-        color: const Color.fromARGB(255, 68, 68, 68),
-      )
-    ];
+  _BeerRecommendationScreenState createState() =>
+      _BeerRecommendationScreenState();
+}
 
+class _BeerRecommendationScreenState extends State<BeerRecommendationScreen> {
+  List<dynamic> _beerList = []; // API에서 받은 맥주 리스트
+  bool _isLoading = true; // 로딩 상태 추가
+  String? _errorMessage; // 오류 메시지 상태 추가
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchRecommendedBeers(); // API 호출하여 데이터 가져오기
+  }
+
+  // API 호출 함수
+  Future<void> _fetchRecommendedBeers() async {
+    final apiCallService = Provider.of<ApiCallService>(context, listen: false);
+
+    try {
+      final response = await apiCallService.dio.get(
+        '/v1/ai/recommend/beer',
+      );
+
+      // API 응답에서 'data' 필드를 먼저 확인한 후 'beerList'에 접근
+      if (response.data != null) {
+        // 응답 데이터 디버깅용 출력
+        print('API Response: ${response.data}');
+
+        if (response.data['data'] != null &&
+            response.data['data']['beerList'] != null) {
+          setState(() {
+            _beerList = response.data['data']['beerList']; // 추천 맥주 리스트 저장
+            _isLoading = false; // 로딩 완료
+          });
+        } else {
+          setState(() {
+            _isLoading = false;
+            _errorMessage = '추천 맥주 목록을 불러오는 데 실패했습니다.';
+          });
+        }
+      } else {
+        // Null 응답 처리
+        setState(() {
+          _isLoading = false;
+          _errorMessage = '추천 맥주 목록이 비어 있습니다.';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Error fetching recommended beers: $e';
+      });
+      print('Error fetching recommended beers: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
           SafeArea(
             child: Padding(
-              padding: EdgeInsets.only(left: 24.0),
+              padding: const EdgeInsets.only(left: 24.0, top: 16.0),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -46,99 +88,108 @@ class BeerRecommendationScreen extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: CardSwiper(
-              cardsCount: cards.length,
-              cardBuilder:
-                  (context, index, percentThresholdX, percentThresholdY) =>
-                      cards[index],
-            ),
+            child: _isLoading
+                ? Center(child: CircularProgressIndicator()) // 로딩 중
+                : _errorMessage != null
+                    ? Center(
+                        child: Text(_errorMessage!,
+                            style: TextStyle(color: Colors.red)))
+                    : _beerList.isEmpty
+                        ? Center(
+                            child: Text('추천할 맥주가 없습니다.')) // 리스트가 비어 있을 경우 처리
+                        : CardSwiper(
+                            cardsCount: _beerList.length,
+                            numberOfCardsDisplayed:
+                                _beerList.length, // 표시할 카드 수 설정
+                            cardBuilder: (context, index, percentThresholdX,
+                                percentThresholdY) {
+                              final beer = _beerList[index];
+                              return BeerCard(
+                                beerName: beer['beerName'] ?? 'Unknown Beer',
+                                beerInfo: beer['beerInformation'] ?? '',
+                                beerTags: beer['beerCharacteristicHashTag']
+                                        ?.cast<String>() ??
+                                    [],
+                                beerImageUrl: beer['beerImageUrl'] ?? '',
+                                alcoholDegree: beer['beerAlcholDegree'] ?? 0,
+                              );
+                            },
+                          ),
           ),
-          //   ListView(
-          //     padding: EdgeInsets.all(16.0),
-          //     children: [
-          //       GestureDetector(
-          //         onTap: () {
-          //           Navigator.push(
-          //             context,
-          //             MaterialPageRoute(
-          //               builder: (context) => BeerDetailScreen(
-          //                 beerName: '페일 에일',
-          //               ),
-          //             ),
-          //           );
-          //         },
-          //         child: BeerCard2(),
-          //       ),
-          //       // 필요한 경우 추가 BeerCards를 추가합니다
-          //     ],
-          //   ),
-          // ),
         ],
       ),
-      //공통 바텀네비게이션 호출
-      bottomNavigationBar: BottomNavigation(),
+      bottomNavigationBar: BottomNavigation(currentIndex: 1),
     );
   }
 }
 
-// class BeerCard2 extends StatelessWidget {
-//   const BeerCard2({super.key});
+class BeerCard extends StatelessWidget {
+  final String beerName;
+  final String beerInfo;
+  final List<String> beerTags;
+  final String beerImageUrl;
+  final int alcoholDegree;
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Card(
-//       color: Colors.black,
-//       child: Padding(
-//         padding: const EdgeInsets.all(16.0),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             Image.asset(
-//               'assets/samplebeerimg.jpg', // 이미지 에셋 추가
-//               height: 100,
-//             ),
-//             SizedBox(height: 8.0),
-//             Text(
-//               'Pale Ale',
-//               style: TextStyle(color: Colors.white, fontSize: 24),
-//             ),
-//             Text(
-//               '페일 에일',
-//               style: TextStyle(color: Colors.white, fontSize: 18),
-//             ),
-//             Text(
-//               'MAGPIE BREWING CO.',
-//               style: TextStyle(color: Colors.white, fontSize: 18),
-//             ),
-//             SizedBox(height: 8.0),
-//             SizedBox(height: 8.0),
-//             Text(
-//               '이 페일에일은 홉의 아로마가 강조되며, 시트러스와 소나무 같은 향이 나는 것이 특징입니다. Earthy Notes와 Hoppy Aroma에 대한 훌륭한 선택을 고려할 때, 이 맥주는 마음에 드실 겁니다.',
-//               style: TextStyle(color: Colors.white),
-//             ),
-//             SizedBox(height: 8.0),
-//             Row(
-//               mainAxisAlignment: MainAxisAlignment.start,
-//               children: [
-//                 Chip(
-//                   label: Text('#페일에일', style: TextStyle(color: Colors.white)),
-//                   backgroundColor: Colors.grey[800],
-//                 ),
-//                 SizedBox(width: 8.0),
-//                 Chip(
-//                   label: Text('#홉', style: TextStyle(color: Colors.white)),
-//                   backgroundColor: Colors.grey[800],
-//                 ),
-//                 SizedBox(width: 8.0),
-//                 Chip(
-//                   label: Text('#시트러스', style: TextStyle(color: Colors.white)),
-//                   backgroundColor: Colors.grey[800],
-//                 ),
-//               ],
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
+  const BeerCard({
+    super.key,
+    required this.beerName,
+    required this.beerInfo,
+    required this.beerTags,
+    required this.beerImageUrl,
+    required this.alcoholDegree,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: const Color.fromARGB(255, 68, 68, 68),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Image.network(
+                beerImageUrl,
+                height: 200,
+                width: 200,
+                errorBuilder: (context, error, stackTrace) {
+                  return Icon(Icons.image_not_supported,
+                      size: 100, color: Colors.white);
+                },
+              ),
+            ),
+            const SizedBox(height: 16.0),
+            Text(
+              beerName,
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold),
+            ),
+            Text(
+              '$alcoholDegree% ABV',
+              style:
+                  TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 16),
+            ),
+            const SizedBox(height: 16.0),
+            Text(
+              beerInfo,
+              style: TextStyle(color: Colors.white),
+            ),
+            const SizedBox(height: 16.0),
+            Wrap(
+              spacing: 8.0,
+              children: beerTags
+                  .map((tag) => Chip(
+                        label: Text(tag, style: TextStyle(color: Colors.white)),
+                        backgroundColor: Colors.grey[800],
+                      ))
+                  .toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
