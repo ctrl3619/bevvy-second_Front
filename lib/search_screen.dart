@@ -13,8 +13,23 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   List<dynamic> searchResults = [];
   String errorMessage = '';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).requestFocus(_searchFocusNode);
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
 
   Future<void> searchBeers(String query) async {
     final apiService = Provider.of<ApiCallService>(context, listen: false);
@@ -64,6 +79,8 @@ class _SearchScreenState extends State<SearchScreen> {
                   Expanded(
                     child: TextField(
                       controller: searchController,
+                      focusNode: _searchFocusNode,
+                      autofocus: true,
                       decoration: InputDecoration(
                         hintText: '맥주 이름',
                         hintStyle: TextStyle(color: Colors.grey),

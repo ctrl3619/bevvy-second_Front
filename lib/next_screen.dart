@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'beerdetail_screen.dart';
 import 'bottom_navigation.dart';
 import 'package:bevvy/comm/api_call.dart';
+import 'recommend.dart';
 
 class NextScreen extends StatefulWidget {
   const NextScreen({super.key});
@@ -113,7 +114,16 @@ class _NextScreenState extends State<NextScreen> {
                     SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () {
-                        // 맥주 추천받기 버튼 클릭 이벤트 처리
+                        Navigator.push(
+                          context,
+                          PageRouteBuilder(
+                            pageBuilder:
+                                (context, animation, secondaryAnimation) =>
+                                    BeerRecommendationScreen(),
+                            transitionDuration: Duration.zero,
+                            reverseTransitionDuration: Duration.zero,
+                          ),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
