@@ -87,7 +87,7 @@ class _NextScreenState extends State<NextScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Image.asset('assets/logo.png', height: 40),
+        title: Image.asset('assets/logo2.png', height: 24),
         centerTitle: false,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         automaticallyImplyLeading: false,
@@ -112,31 +112,34 @@ class _NextScreenState extends State<NextScreen> {
                       ),
                     ),
                     SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          PageRouteBuilder(
-                            pageBuilder:
-                                (context, animation, secondaryAnimation) =>
-                                    BeerRecommendationScreen(),
-                            transitionDuration: Duration.zero,
-                            reverseTransitionDuration: Duration.zero,
+                    SizedBox(
+                      width: 232,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            PageRouteBuilder(
+                              pageBuilder:
+                                  (context, animation, secondaryAnimation) =>
+                                      BeerRecommendationScreen(),
+                              transitionDuration: Duration.zero,
+                              reverseTransitionDuration: Duration.zero,
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
                           ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 32, vertical: 12),
                         ),
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                      ),
-                      child: Text(
-                        "맥주 추천받기",
-                        style: TextStyle(color: Colors.black),
+                        child: Text(
+                          "맥주 추천받기",
+                          style: TextStyle(color: Colors.black),
+                        ),
                       ),
                     ),
                   ],
@@ -153,11 +156,6 @@ class _NextScreenState extends State<NextScreen> {
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
-                  ),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    color: Colors.white,
-                    size: 20,
                   ),
                 ],
               ),
@@ -197,11 +195,6 @@ class _NextScreenState extends State<NextScreen> {
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
-                  ),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    color: Colors.white,
-                    size: 20,
                   ),
                 ],
               ),
@@ -303,7 +296,7 @@ class PopularPub extends StatelessWidget {
         Navigator.pushNamed(context, destination);
       },
       child: Container(
-        width: 260,
+        width: 216,
         margin: EdgeInsets.only(right: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -312,8 +305,8 @@ class PopularPub extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
               child: Image.network(
                 imageUrl,
-                height: 162,
-                width: 260,
+                height: 120,
+                width: 216,
                 fit: BoxFit.cover,
               ),
             ),

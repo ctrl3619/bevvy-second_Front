@@ -3,6 +3,8 @@ import 'bottom_navigation.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:provider/provider.dart'; // ApiCallService 사용하기 위해 추가
 import 'package:bevvy/comm/api_call.dart'; // ApiCallService 불러오기
+import 'dart:async';
+import 'package:lottie/lottie.dart'; // 상단에 추가
 
 class BeerRecommendationScreen extends StatefulWidget {
   const BeerRecommendationScreen({super.key});
@@ -12,15 +14,48 @@ class BeerRecommendationScreen extends StatefulWidget {
       _BeerRecommendationScreenState();
 }
 
-class _BeerRecommendationScreenState extends State<BeerRecommendationScreen> {
+class _BeerRecommendationScreenState extends State<BeerRecommendationScreen>
+    with SingleTickerProviderStateMixin {
   List<dynamic> _beerList = []; // API에서 받은 맥주 리스트
   bool _isLoading = true; // 로딩 상태 추가
   String? _errorMessage; // 오류 메시지 상태 추가
+  late AnimationController _animationController;
+  final List<String> _loadingMessages = [
+    '맛있는 맥주를 찾고 있어요! 🍺',
+    '전 세계 맥주를 둘러보는 중... 🌍',
+    '당신의 취향을 분석하고 있어요 ✨',
+    '맥주 전문가들이 고심하는 중입니다 🤔',
+    '완벽한 한 잔을 준비하고 있어요 🎯'
+  ];
+  int _currentMessageIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    _fetchRecommendedBeers(); // API 호출하여 데이터 가져오기
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat();
+
+    // 로딩 메시지 변경을 위한 타이머
+    Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (!_isLoading) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        _currentMessageIndex =
+            (_currentMessageIndex + 1) % _loadingMessages.length;
+      });
+    });
+
+    _fetchRecommendedBeers();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   // API 호출 함수
@@ -89,7 +124,31 @@ class _BeerRecommendationScreenState extends State<BeerRecommendationScreen> {
           ),
           Expanded(
             child: _isLoading
-                ? Center(child: CircularProgressIndicator()) // 로딩 중
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 200,
+                          height: 200,
+                          child: Lottie.network(
+                            'https://lottie.host/615eb1a8-f40f-4c02-90fa-f98c291afb93/EXc0SatGe3.json', // 맥주 관련 Lottie 애니메이션
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                        const SizedBox(height: 0),
+                        Text(
+                          _loadingMessages[_currentMessageIndex],
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  )
                 : _errorMessage != null
                     ? Center(
                         child: Text(_errorMessage!,

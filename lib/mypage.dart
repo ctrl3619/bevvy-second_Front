@@ -35,6 +35,8 @@ class _MyPageState extends State<MyPage>
   List<Beer> savedBeers = [];
   late TabController _tabController;
   late FocusNode _focusNode;
+  String userName = '';
+  String comment = '';
 
   @override
   bool get wantKeepAlive => true;
@@ -76,6 +78,9 @@ class _MyPageState extends State<MyPage>
       if (response.statusCode == 200) {
         final data = response.data['data'];
         setState(() {
+          userName = data['userName'] ?? '';
+          comment = data['comment'] ?? '';
+
           ratedBeers = (data['triedBeerList'] as List)
               .where((beer) => beer['selfRating'] > 0)
               .map((beer) => Beer(
@@ -155,7 +160,7 @@ class _MyPageState extends State<MyPage>
             ),
             SizedBox(height: 10),
             Text(
-              '맥주킹 백상훈',
+              userName,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 24,
@@ -163,12 +168,17 @@ class _MyPageState extends State<MyPage>
               ),
             ),
             SizedBox(height: 5),
-            Text(
-              '맥주 세계의 탐험가\n깊은 맛의 정글을 누비는 풍미의 모험가',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 16,
+            Center(
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.8,
+                child: Text(
+                  comment,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 16,
+                  ),
+                ),
               ),
             ),
             SizedBox(height: 20),
