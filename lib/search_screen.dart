@@ -13,8 +13,23 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   List<dynamic> searchResults = [];
   String errorMessage = '';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).requestFocus(_searchFocusNode);
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
 
   Future<void> searchBeers(String query) async {
     final apiService = Provider.of<ApiCallService>(context, listen: false);
@@ -46,30 +61,30 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
                 children: [
                   IconButton(
-                    icon: Icon(Icons.arrow_back, color: Colors.white),
-                    onPressed: () => Navigator.of(context).pop(),
+                    icon: Icon(Icons.search, color: Colors.white),
+                    onPressed: () {
+                      if (searchController.text.isNotEmpty) {
+                        searchBeers(searchController.text);
+                      }
+                    },
                   ),
                   Expanded(
                     child: TextField(
                       controller: searchController,
+                      focusNode: _searchFocusNode,
+                      autofocus: true,
                       decoration: InputDecoration(
-                        hintText: '검색',
+                        hintText: '맥주 이름',
                         hintStyle: TextStyle(color: Colors.grey),
-                        filled: true,
-                        fillColor: Colors.white.withOpacity(0.1),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30.0),
-                          borderSide: BorderSide.none,
-                        ),
-                        prefixIcon: Icon(Icons.search, color: Colors.white),
+                        border: InputBorder.none,
                       ),
                       style: TextStyle(color: Colors.white),
                       onSubmitted: (value) {
@@ -79,11 +94,18 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                 ],
               ),
-              SizedBox(height: 16),
-              errorMessage.isNotEmpty
-                  ? Text(errorMessage,
-                      style: TextStyle(color: Colors.white, fontSize: 16))
-                  : Expanded(
+            ),
+            Container(
+              height: 1,
+              color: Color(0xFF938F99),
+            ),
+            SizedBox(height: 16),
+            errorMessage.isNotEmpty
+                ? Text(errorMessage,
+                    style: TextStyle(color: Colors.white, fontSize: 16))
+                : Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
                       child: ListView.builder(
                         itemCount: searchResults.length,
                         itemBuilder: (context, index) {
@@ -93,8 +115,8 @@ class _SearchScreenState extends State<SearchScreen> {
                         },
                       ),
                     ),
-            ],
-          ),
+                  ),
+          ],
         ),
       ),
       bottomNavigationBar: BottomNavigation(currentIndex: 2),

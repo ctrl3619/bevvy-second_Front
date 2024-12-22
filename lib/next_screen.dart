@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'beerdetail_screen.dart';
 import 'bottom_navigation.dart';
 import 'package:bevvy/comm/api_call.dart';
+import 'recommend.dart';
+import 'pubdetail_screen.dart';
 
 class NextScreen extends StatefulWidget {
   const NextScreen({super.key});
@@ -86,7 +88,7 @@ class _NextScreenState extends State<NextScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Image.asset('assets/logo.png', height: 40),
+        title: Image.asset('assets/logo2.png', height: 24),
         centerTitle: false,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         automaticallyImplyLeading: false,
@@ -111,22 +113,34 @@ class _NextScreenState extends State<NextScreen> {
                       ),
                     ),
                     SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        // 맥주 추천받기 버튼 클릭 이벤트 처리
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
+                    SizedBox(
+                      width: 232,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            PageRouteBuilder(
+                              pageBuilder:
+                                  (context, animation, secondaryAnimation) =>
+                                      BeerRecommendationScreen(),
+                              transitionDuration: Duration.zero,
+                              reverseTransitionDuration: Duration.zero,
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 32, vertical: 12),
                         ),
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                      ),
-                      child: Text(
-                        "맥주 추천받기",
-                        style: TextStyle(color: Colors.black),
+                        child: Text(
+                          "맥주 추천받기",
+                          style: TextStyle(color: Colors.black),
+                        ),
                       ),
                     ),
                   ],
@@ -143,11 +157,6 @@ class _NextScreenState extends State<NextScreen> {
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
-                  ),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    color: Colors.white,
-                    size: 20,
                   ),
                 ],
               ),
@@ -188,11 +197,6 @@ class _NextScreenState extends State<NextScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    color: Colors.white,
-                    size: 20,
-                  ),
                 ],
               ),
               SizedBox(height: 16),
@@ -206,7 +210,7 @@ class _NextScreenState extends State<NextScreen> {
                             imageUrl: pub['imageUrl'],
                             name: pub['name'],
                             location: pub['location'],
-                            destination: 'A', // 이동할 화면 경로 지정 (예시)
+                            destination: pub['pubId'].toString(),
                           );
                         }).toList(),
                       ),
@@ -290,10 +294,17 @@ class PopularPub extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(context, destination);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PubDetailScreen(
+              pubId: destination, // pubId를 전달
+            ),
+          ),
+        );
       },
       child: Container(
-        width: 260,
+        width: 216,
         margin: EdgeInsets.only(right: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -302,8 +313,8 @@ class PopularPub extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
               child: Image.network(
                 imageUrl,
-                height: 162,
-                width: 260,
+                height: 120,
+                width: 216,
                 fit: BoxFit.cover,
               ),
             ),
