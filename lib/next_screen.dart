@@ -4,6 +4,7 @@ import 'beerdetail_screen.dart';
 import 'bottom_navigation.dart';
 import 'package:bevvy/comm/api_call.dart';
 import 'recommend.dart';
+import 'pubdetail_screen.dart';
 
 class NextScreen extends StatefulWidget {
   const NextScreen({super.key});
@@ -209,7 +210,7 @@ class _NextScreenState extends State<NextScreen> {
                             imageUrl: pub['imageUrl'],
                             name: pub['name'],
                             location: pub['location'],
-                            destination: 'A', // 이동할 화면 경로 지정 (예시)
+                            destination: pub['pubId'].toString(),
                           );
                         }).toList(),
                       ),
@@ -293,7 +294,14 @@ class PopularPub extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(context, destination);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PubDetailScreen(
+              pubId: destination, // pubId를 전달
+            ),
+          ),
+        );
       },
       child: Container(
         width: 216,
