@@ -16,20 +16,27 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final apiCallService = Provider.of<ApiCallService>(context);
     Future<void> checkFirstLogin(BuildContext context) async {
-      final response = await apiCallService.dio.get('/v1/user/first');
-      if (response.statusCode == 200) {
-        final data = response.data;
-        if (data['data']['firstIndicator'] == true) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => NextScreen()),
-          );
-        } else {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => OnboardingScreen()),
-          );
+      try {
+        final response = await apiCallService.dio.get('/v1/user/first');
+        if (response.statusCode == 200) {
+          final data = response.data;
+          if (data['data']['firstIndicator'] == true) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => NextScreen()),
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => OnboardingScreen()),
+            );
+          }
         }
+      } catch (e) {
+        print('첫 로그인 확인 중 에러 발생: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('로그인 상태 확인 중 오류가 발생했습니다.')),
+        );
       }
     }
 
@@ -59,13 +66,22 @@ class LoginScreen extends StatelessWidget {
                 icon: Icon(Icons.login),
                 label: Text('구글 로그인'),
                 onPressed: () async {
-                  // Google 로그인을 시도합니다.
-                  User? user = await loginservice.signInWithGoogle();
-                  print(user);
-                  if (user != null) {
-                    print("login accessToken : ${loginservice.accessToken}");
-                    apiCallService.setAccessToken(loginservice.accessToken);
-                    await checkFirstLogin(context);
+                  try {
+                    User? user = await loginservice.signInWithGoogle();
+                    print('로그인 시도 결과: ${user != null ? "성공" : "실패"}');
+
+                    if (user != null) {
+                      print("로그인 액세스 토큰: ${loginservice.accessToken}");
+                      apiCallService.setAccessToken(loginservice.accessToken);
+                      await checkFirstLogin(context);
+                    } else {
+                      throw Exception('로그인 실패');
+                    }
+                  } catch (e) {
+                    print('구글 로그인 중 에러 발생: $e');
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('로그인 중 오류가 발생했습니다.')),
+                    );
                   }
                 },
                 style: ElevatedButton.styleFrom(
