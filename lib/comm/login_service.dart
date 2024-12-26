@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginService extends ChangeNotifier {
   String? accessToken;
@@ -34,5 +35,37 @@ class LoginService extends ChangeNotifier {
 
     user = userCredential.user; // 로그인한 사용자를 반환합니다.
     return user;
+  }
+
+  // 자동 로그인 상태 저장
+  Future<void> saveLoginInfo(String? token) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (token != null) {
+      await prefs.setString('accessToken', token);
+      accessToken = token;
+      notifyListeners();
+    }
+  }
+
+  // 저장된 로그인 정보로 자동 로그인 시도
+  Future<bool> tryAutoLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedToken = prefs.getString('accessToken');
+
+    if (savedToken != null) {
+      accessToken = savedToken;
+      notifyListeners();
+      return true;
+    }
+    return false;
+  }
+
+  // 로그아웃
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('accessToken');
+    accessToken = null;
+    user = null;
+    notifyListeners();
   }
 }

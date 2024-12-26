@@ -75,10 +75,56 @@ class _LandingPageState extends State<LandingPage> {
   @override
   void initState() {
     super.initState();
-    // [20241004] 빌드가 완료된 후에 상태를 확인하고 네비게이션 처리
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkUserStatus();
+      _checkLoginStatus();
     });
+  }
+
+  Future<void> _checkLoginStatus() async {
+    final loginService = Provider.of<LoginService>(context, listen: false);
+    final apiCallService = Provider.of<ApiCallService>(context, listen: false);
+    final appState = Provider.of<AppState>(context, listen: false);
+
+    try {
+      // 자동 로그인 시도
+      final isAutoLoginSuccess = await loginService.tryAutoLogin();
+
+      if (isAutoLoginSuccess) {
+        // 토큰이 있으면 API 서비스에 설정
+        apiCallService.setAccessToken(loginService.accessToken);
+        appState.logIn();
+
+        // 첫 로그인 여부 확인
+        final response = await apiCallService.dio.get('/v1/user/first');
+
+        if (response.statusCode == 200) {
+          final data = response.data;
+          if (data['data']['firstIndicator'] == true) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => NextScreen()),
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => OnboardingScreen()),
+            );
+          }
+        }
+      } else {
+        // 자동 로그인 실패시 로그인 화면으로 이동
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginScreen()),
+        );
+      }
+    } catch (e) {
+      print('자동 로그인 중 오류 발생: $e');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+      );
+    }
   }
 
   // 사용자 상태를 확인하고 적절한 화면으로 네비게이션하는 메서드

@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+version: 1.0.0+3
 
 environment:
   sdk: '>=3.3.1 <4.0.0'
@@ -38,7 +38,7 @@ dependencies:
   provider: ^6.1.2
   firebase_core: ^2.31.1
   firebase_auth: ^4.19.6
-  shared_preferences: ^2.0.6
+  shared_preferences: ^2.2.2
   cloud_firestore: ^4.17.5
   dio: ^5.4.3+1
   flutter_card_swiper: ^7.0.1
@@ -96,5 +96,6 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
-  assets:     # 새로 추가한 부분
-    - assets/ # assets 폴더의 모든 이미지를 불러옴
+  assets:
+    - assets/
+    # - assets/beerloading.gif

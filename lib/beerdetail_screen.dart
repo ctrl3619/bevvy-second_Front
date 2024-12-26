@@ -464,7 +464,7 @@ class _BeerDetailScreenState extends State<BeerDetailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    // 사용자 이름과 점을 가로로 정렬
+                                    // 사용자 이름과 평점, 좋아요 버튼을 가로로 정렬
                                     Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
@@ -479,18 +479,61 @@ class _BeerDetailScreenState extends State<BeerDetailScreen> {
                                         ),
                                         Row(
                                           children: [
-                                            Icon(
-                                              Icons.star,
-                                              size: 16,
-                                              color: Color(0xFFD8D8D8),
-                                            ),
-                                            SizedBox(width: 4),
-                                            Text(
-                                              '${(comment['beerSelfRating'] ?? 0.0).toStringAsFixed(1)}',
-                                              style: TextStyle(
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.star,
+                                                  size: 16,
                                                   color: Color(0xFFD8D8D8),
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold),
+                                                ),
+                                                SizedBox(width: 4),
+                                                Text(
+                                                  '${(comment['beerSelfRating'] ?? 0.0).toStringAsFixed(1)}',
+                                                  style: TextStyle(
+                                                      color: Color(0xFFD8D8D8),
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(
+                                                width: 16), // 평점과 좋아요 버튼 사이 간격
+                                            GestureDetector(
+                                              onTap: () {
+                                                print(
+                                                    '좋아요 버튼 클릭 - commentId: ${comment['beerCommentId']}');
+                                                _toggleLike(
+                                                    comment['beerCommentId']);
+                                              },
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    (comment['likeCount'] > 0)
+                                                        ? Icons.thumb_up
+                                                        : Icons
+                                                            .thumb_up_outlined,
+                                                    size: 16,
+                                                    color:
+                                                        (comment['likeCount'] >
+                                                                0)
+                                                            ? Colors.blue
+                                                            : Color(0xFFD8D8D8),
+                                                  ),
+                                                  SizedBox(width: 4),
+                                                  Text(
+                                                    '${comment['likeCount'] ?? 0}',
+                                                    style: TextStyle(
+                                                      color: (comment[
+                                                                  'likeCount'] >
+                                                              0)
+                                                          ? Colors.blue
+                                                          : Color(0xFFD8D8D8),
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -505,6 +548,7 @@ class _BeerDetailScreenState extends State<BeerDetailScreen> {
                                         fontSize: 14,
                                       ),
                                     ),
+                                    SizedBox(height: 8),
                                   ],
                                 ),
                               ),
@@ -655,5 +699,34 @@ class _BeerDetailScreenState extends State<BeerDetailScreen> {
     });
 
     return sum / comments.length;
+  }
+
+  // 좋아요 토글 메서드 추가
+  Future<void> _toggleLike(int commentId) async {
+    final apiCallService = Provider.of<ApiCallService>(context, listen: false);
+
+    try {
+      final response = await apiCallService.dio.put(
+        '/v1/beer/comment/like',
+        queryParameters: {'beerCommentId': commentId},
+      );
+
+      if (response.statusCode == 200) {
+        print('좋아요 토글 성공 - commentId: $commentId');
+        setState(() {
+          _loadComments(); // 댓글 목록 새로고침
+        });
+      } else {
+        print('좋아요 토글 실패 - status code: ${response.statusCode}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('좋아요 처리 중 오류가 발생했습니다.')),
+        );
+      }
+    } catch (e) {
+      print('좋아요 토글 실패 - 에러: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('좋아요 처리 중 오류가 발생했습니다.')),
+      );
+    }
   }
 }
