@@ -72,6 +72,8 @@ class LoginScreen extends StatelessWidget {
 
                     if (user != null) {
                       print("로그인 액세스 토큰: ${loginservice.accessToken}");
+                      await loginservice
+                          .saveLoginInfo(loginservice.accessToken);
                       apiCallService.setAccessToken(loginservice.accessToken);
                       await checkFirstLogin(context);
                     } else {

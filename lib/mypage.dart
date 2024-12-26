@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 import 'bottom_navigation.dart';
 import 'beerdetail_screen.dart';
 import 'package:bevvy/comm/api_call.dart'; // ApiCallService 불러오기
+import 'login_screen.dart';
+import 'package:bevvy/comm/login_service.dart';
+import 'package:bevvy/app_state.dart';
 
 class Beer {
   final String id;
@@ -150,6 +153,30 @@ class _MyPageState extends State<MyPage>
         appBar: AppBar(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           elevation: 0,
+          actions: [
+            TextButton(
+              child: Text(
+                '로그아웃',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                ),
+              ),
+              onPressed: () async {
+                final loginService =
+                    Provider.of<LoginService>(context, listen: false);
+                final appState = Provider.of<AppState>(context, listen: false);
+
+                await loginService.logout();
+                appState.logOut();
+
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                  (route) => false,
+                );
+              },
+            ),
+          ],
         ),
         body: Column(
           children: [

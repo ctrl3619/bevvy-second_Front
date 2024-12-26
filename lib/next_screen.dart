@@ -139,7 +139,8 @@ class _NextScreenState extends State<NextScreen> {
                         ),
                         child: Text(
                           "맥주 추천받기",
-                          style: TextStyle(color: Colors.black),
+                          style: TextStyle(
+                              color: Colors.black, fontWeight: FontWeight.w600),
                         ),
                       ),
                     ),
@@ -167,20 +168,82 @@ class _NextScreenState extends State<NextScreen> {
                       scrollDirection: Axis.horizontal,
                       child: Row(
                         children: recommendedBeers.map((beer) {
-                          // null 체크 후 대체 값 설정
-                          final beerId = beer['beerId']?.toString() ?? 'N/A';
-                          final beerName = beer['beerName'] ?? 'No Name';
-                          final imageUrl = beer['beerImageUrl'] ??
-                              'https://via.placeholder.com/118x156';
-                          final rating = beer['beerRating'] != null
-                              ? '⭐ ${beer['beerRating']}'
-                              : '⭐ 0';
+                          final beerId = beer['beerId']?.toString() ?? '';
+                          final imageUrl = beer['beerImageUrl'] ?? '';
+                          final beerName = beer['beerName'] ?? '이름 없음';
+                          final rating = beer['beerRating']?.toDouble() ?? 0.0;
 
-                          return PopularBeer(
-                            beerId: beerId,
-                            imageUrl: imageUrl,
-                            beerName: beerName,
-                            rate: rating,
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => BeerDetailScreen(
+                                    beerId: beerId,
+                                    initialSavedState: false,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              margin: EdgeInsets.only(right: 16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    height: 156,
+                                    width: 118,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[900],
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Center(
+                                        child: Image.network(
+                                          imageUrl,
+                                          fit: BoxFit.contain,
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                            return Container(
+                                              color: Colors.grey[800],
+                                              child: Icon(Icons.error,
+                                                  color: Colors.grey),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    beerName,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.star,
+                                        color: Colors.amber,
+                                        size: 16,
+                                      ),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        rating.toStringAsFixed(1),
+                                        style: TextStyle(
+                                          color: Colors.white.withOpacity(0.7),
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
                           );
                         }).toList(),
                       ),
@@ -207,10 +270,11 @@ class _NextScreenState extends State<NextScreen> {
                       child: Row(
                         children: recommendedPubs.map((pub) {
                           return PopularPub(
-                            imageUrl: pub['imageUrl'],
-                            name: pub['name'],
-                            location: pub['location'],
-                            destination: pub['pubId'].toString(),
+                            imageUrl: pub['imageUrlList']?[0] ?? '',
+                            name: pub['name'] ?? '이름 없음',
+                            location: pub['location'] ?? '위치 정보 없음',
+                            pubInformation: pub['pubInformation'] ?? '',
+                            destination: pub['pubId']?.toString() ?? '',
                           );
                         }).toList(),
                       ),
@@ -260,11 +324,42 @@ class PopularBeer extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                imageUrl,
-                height: 156,
-                width: 118,
-                fit: BoxFit.cover,
+              child: Container(
+                height: 120,
+                width: 140,
+                decoration: BoxDecoration(
+                  color: Colors.grey[900],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Center(
+                    child: AspectRatio(
+                      aspectRatio: 0.75, // 높이:너비 = 4:3 비율
+                      child: Image.network(
+                        imageUrl,
+                        fit: BoxFit.fitHeight, // 높이에 맞추기
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey[800],
+                            child: Icon(Icons.error, color: Colors.grey),
+                          );
+                        },
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                  : null,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
             SizedBox(height: 8),
@@ -281,12 +376,14 @@ class PopularPub extends StatelessWidget {
   final String imageUrl;
   final String name;
   final String location;
+  final String pubInformation;
   final String destination;
 
   const PopularPub({
     required this.imageUrl,
     required this.name,
     required this.location,
+    required this.pubInformation,
     required this.destination,
   });
 
@@ -298,13 +395,12 @@ class PopularPub extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (context) => PubDetailScreen(
-              pubId: destination, // pubId를 전달
+              pubId: destination,
             ),
           ),
         );
       },
       child: Container(
-        width: 216,
         margin: EdgeInsets.only(right: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -313,25 +409,50 @@ class PopularPub extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
               child: Image.network(
                 imageUrl,
-                height: 120,
-                width: 216,
+                width: 220,
+                height: 112,
                 fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: Colors.grey[800],
+                    child: Icon(Icons.error, color: Colors.grey),
+                  );
+                },
               ),
             ),
             SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Text(name, style: TextStyle(color: Colors.white)),
-                Row(
-                  children: [
-                    Icon(Icons.location_on, color: Colors.grey, size: 16),
-                    SizedBox(width: 4),
-                    Text(location, style: TextStyle(color: Colors.grey)),
-                  ],
-                ),
-              ],
+            Container(
+              width: 220,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    name,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_on,
+                        color: Colors.white.withOpacity(0.7),
+                        size: 12,
+                      ),
+                      SizedBox(width: 4),
+                      Text(
+                        location,
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.7),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
         ),

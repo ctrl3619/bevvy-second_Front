@@ -7,10 +7,14 @@ import 'package:lottie/lottie.dart';
 
 class PubBeerRecommendationScreen extends StatefulWidget {
   final String pubId;
+  final String pubName;
+  final String pubLocation;
 
   const PubBeerRecommendationScreen({
     Key? key,
     required this.pubId,
+    required this.pubName,
+    required this.pubLocation,
   }) : super(key: key);
 
   @override
@@ -31,6 +35,7 @@ class _PubBeerRecommendationScreenState
     '완벽한 한 잔을 준비하고 있어요 🎯'
   ];
   int _currentMessageIndex = 0;
+  bool _showRecommendButton = false;
 
   @override
   void initState() {
@@ -112,11 +117,61 @@ class _PubBeerRecommendationScreenState
         ),
         title: Text(
           '펍 맥주 추천',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ),
       body: Column(
         children: [
+          Container(
+            padding: EdgeInsets.only(
+              top: 16.0,
+              left: 16.0,
+              right: 16.0,
+              bottom: 0,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.pubName,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.location_on,
+                      color: Colors.white.withOpacity(0.7),
+                      size: 16,
+                    ),
+                    SizedBox(width: 4),
+                    Text(
+                      widget.pubLocation,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.7),
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 16),
+                  child: Divider(
+                    color: Colors.white.withOpacity(0.2),
+                    height: 1,
+                  ),
+                ),
+              ],
+            ),
+          ),
           Expanded(
             child: _isLoading
                 ? Center(
@@ -127,7 +182,7 @@ class _PubBeerRecommendationScreenState
                           width: 200,
                           height: 200,
                           child: Lottie.network(
-                            'https://lottie.host/615eb1a8-f40f-4c02-90fa-f98c291afb93/EXc0SatGe3.json',
+                            'https://lottie.host/a4c1f843-e141-4902-80b6-15819ffedc22/rXKcXjp1Gy.json',
                             fit: BoxFit.contain,
                           ),
                         ),
@@ -150,23 +205,92 @@ class _PubBeerRecommendationScreenState
                             style: TextStyle(color: Colors.red)))
                     : _beerList.isEmpty
                         ? Center(child: Text('추천할 맥주가 없습니다.'))
-                        : CardSwiper(
-                            cardsCount: _beerList.length,
-                            numberOfCardsDisplayed: _beerList.length,
-                            cardBuilder: (context, index, percentThresholdX,
-                                percentThresholdY) {
-                              final beer = _beerList[index];
-                              return BeerCard(
-                                beerName: beer['beerName'] ?? 'Unknown Beer',
-                                beerInfo: beer['beerInformation'] ?? '',
-                                beerTags: beer['beerCharacteristicHashTag']
-                                        ?.cast<String>() ??
-                                    [],
-                                beerImageUrl: beer['beerImageUrl'] ?? '',
-                                alcoholDegree:
-                                    beer['beerAlcoholDegree']?.toInt() ?? 0,
-                              );
-                            },
+                        : Stack(
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.only(bottom: 58),
+                                child: CardSwiper(
+                                  cardsCount: 3,
+                                  numberOfCardsDisplayed: 3,
+                                  cardBuilder: (context, index,
+                                      percentThresholdX, percentThresholdY) {
+                                    final beer = _beerList[index];
+                                    return BeerCard(
+                                      beerName:
+                                          beer['beerName'] ?? 'Unknown Beer',
+                                      beerInfo: beer['beerInformation'] ?? '',
+                                      beerTags:
+                                          beer['beerCharacteristicHashTag']
+                                                  ?.cast<String>() ??
+                                              [],
+                                      beerImageUrl: beer['beerImageUrl'] ?? '',
+                                      alcoholDegree:
+                                          beer['beerAlcoholDegree']?.toInt() ??
+                                              0,
+                                    );
+                                  },
+                                  onEnd: () => setState(
+                                      () => _showRecommendButton = true),
+                                  isLoop: false,
+                                  allowedSwipeDirection:
+                                      AllowedSwipeDirection.only(
+                                          left: true, right: true),
+                                ),
+                              ),
+                              if (_showRecommendButton)
+                                Center(
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.transparent,
+                                      elevation: 0,
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 24,
+                                        vertical: 12,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _showRecommendButton = false;
+                                        _isLoading = true;
+                                      });
+                                      _fetchRecommendedBeers();
+                                    },
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.refresh,
+                                          color: Colors.white,
+                                          size: 32,
+                                        ),
+                                        SizedBox(height: 16),
+                                        Text(
+                                          '새로운 맥주 추천받기',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        SizedBox(height: 8),
+                                        Text(
+                                          '더 정확한 추천을 원하시면 맥주 평가를 해보세요!',
+                                          style: TextStyle(
+                                            color:
+                                                Colors.white.withOpacity(0.7),
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
           ),
         ],
@@ -194,13 +318,16 @@ class BeerCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: const Color.fromARGB(255, 68, 68, 68),
+      color: const Color.fromARGB(255, 45, 45, 45),
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
+        borderRadius: BorderRadius.circular(16.0),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(
+          vertical: 24.0,
+          horizontal: 16.0,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -209,13 +336,14 @@ class BeerCard extends StatelessWidget {
                 beerImageUrl,
                 height: 200,
                 width: 200,
+                fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) {
                   return Icon(Icons.image_not_supported,
                       size: 100, color: Colors.white);
                 },
               ),
             ),
-            const SizedBox(height: 16.0),
+            Spacer(flex: 1),
             Text(
               beerName,
               style: TextStyle(
@@ -235,11 +363,22 @@ class BeerCard extends StatelessWidget {
             ),
             const SizedBox(height: 16.0),
             Wrap(
-              spacing: 8.0,
               children: beerTags
-                  .map((tag) => Chip(
-                        label: Text(tag, style: TextStyle(color: Colors.white)),
-                        backgroundColor: Colors.grey[800],
+                  .map((tag) => Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        margin: EdgeInsets.only(right: 8, bottom: 8),
+                        decoration: BoxDecoration(
+                          color: Color.fromARGB(255, 46, 46, 46),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          tag,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12.0,
+                          ),
+                        ),
                       ))
                   .toList(),
             ),

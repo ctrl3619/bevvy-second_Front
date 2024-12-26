@@ -92,7 +92,8 @@ class _PubDetailScreenState extends State<PubDetailScreen> {
             return {
               'name': pubDetail['name'],
               'location': pubDetail['location'],
-              'imageUrl': pubDetail['imageUrl'],
+              'imageUrlList': pubDetail['imageUrlList'] ?? [],
+              'information': pubDetail['pubInformation'],
             };
           }
         }
@@ -263,8 +264,10 @@ class _PubDetailScreenState extends State<PubDetailScreen> {
         return false;
       },
       child: Scaffold(
+        backgroundColor: Color(0xFF2A282D),
         appBar: AppBar(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          backgroundColor: Color(0xFF2A282D),
+          elevation: 0,
           leading: IconButton(
             icon: Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () => Navigator.pop(context),
@@ -278,140 +281,159 @@ class _PubDetailScreenState extends State<PubDetailScreen> {
             ),
           ],
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 이미지 그리드
-              Container(
-                height: 240,
-                width: double.infinity,
-                child: FutureBuilder<Map<String, dynamic>>(
-                  future: _pubDetailFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    }
-                    if (snapshot.hasError || !snapshot.hasData) {
+        body: Container(
+          color: Color(0xFF2A282D),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 이미지 그리드
+                Container(
+                  height: 200,
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  child: FutureBuilder<Map<String, dynamic>>(
+                    future: _pubDetailFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      }
+
+                      final imageUrls =
+                          snapshot.data?['imageUrlList'] as List<dynamic>? ??
+                              [];
+
                       return Container(
-                        color: Colors.grey[900],
-                        child: Center(
-                          child: Icon(
-                            Icons.image_not_supported,
-                            color: Colors.white54,
-                            size: 50,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[900],
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: Image.network(
+                            imageUrls.isNotEmpty ? imageUrls[0].toString() : '',
+                            width: double.infinity,
+                            height: double.infinity,
+                            fit: BoxFit.cover,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Center(child: CircularProgressIndicator());
+                            },
+                            errorBuilder: (context, error, stackTrace) {
+                              return Center(
+                                child: Icon(Icons.image_not_supported,
+                                    color: Colors.white54, size: 50),
+                              );
+                            },
                           ),
                         ),
                       );
-                    }
-
-                    return Image.network(
-                      snapshot.data!['imageUrl'] ??
-                          'https://via.placeholder.com/240',
-                      fit: BoxFit.cover,
-                    );
-                  },
+                    },
+                  ),
                 ),
-              ),
-              // 펍 정보
-              Container(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    FutureBuilder<Map<String, dynamic>>(
-                      future: _pubDetailFuture,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return Center(child: CircularProgressIndicator());
-                        }
-                        if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}',
-                              style: TextStyle(color: Colors.red));
-                        }
-                        if (!snapshot.hasData) {
-                          return Text('No data available',
-                              style: TextStyle(color: Colors.white));
-                        }
+                // 펍 정보
+                Container(
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FutureBuilder<Map<String, dynamic>>(
+                        future: _pubDetailFuture,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Center(child: CircularProgressIndicator());
+                          }
+                          if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}',
+                                style: TextStyle(color: Colors.red));
+                          }
+                          if (!snapshot.hasData) {
+                            return Text('No data available',
+                                style: TextStyle(color: Colors.white));
+                          }
 
-                        final pubData = snapshot.data!;
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(Icons.location_on,
-                                    color: Colors.grey, size: 16),
-                                SizedBox(width: 4),
-                                Text(
-                                  pubData['location'] ?? '',
-                                  style: TextStyle(color: Colors.grey),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              pubData['name'] ?? '',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              '맥주와 수제 소시지를 운영하는 리타 비터 바(rita bitter bar)입니다.',
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                            SizedBox(height: 16),
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        PubBeerRecommendationScreen(
-                                      pubId: widget.pubId,
-                                    ),
+                          final pubData = snapshot.data!;
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.location_on,
+                                      color: Colors.grey, size: 16),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    pubData['location'] ?? '',
+                                    style: TextStyle(color: Colors.grey),
                                   ),
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                minimumSize: Size(double.infinity, 48),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
+                                ],
                               ),
-                              child: Text(
-                                '맥주 추천받기',
+                              SizedBox(height: 8),
+                              Text(
+                                pubData['name'] ?? '',
                                 style: TextStyle(
-                                  color: Colors.black,
+                                  color: Colors.white,
+                                  fontSize: 24,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                            ),
-                            SizedBox(height: 24),
-                            Text(
-                              '맥주 목록',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                              SizedBox(height: 8),
+                              Text(
+                                pubData['information'] ?? '펍 정보가 없습니다.',
+                                style: TextStyle(color: Colors.grey),
                               ),
-                            ),
-                            SizedBox(height: 16),
-                            // 맥주 리스트
-                            _buildBeerList(),
-                          ],
-                        );
-                      },
-                    ),
-                  ],
+                              SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          PubBeerRecommendationScreen(
+                                        pubId: widget.pubId,
+                                        pubName: pubData['name'] ?? '',
+                                        pubLocation: pubData['location'] ?? '',
+                                      ),
+                                    ),
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      Color.fromARGB(255, 44, 44, 44),
+                                  minimumSize: Size(double.infinity, 48),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                child: Text(
+                                  '맥주 추천받기',
+                                  style: TextStyle(
+                                    color: Color.fromARGB(255, 222, 222, 222),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 24),
+                              Text(
+                                '맥주 목록',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 16),
+                              // 맥주 리스트
+                              _buildBeerList(),
+                            ],
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
