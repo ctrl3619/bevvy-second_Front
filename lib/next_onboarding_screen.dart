@@ -111,10 +111,12 @@ class _NextOnboardingScreenState extends State<NextOnboardingScreen> {
                   fontSize: 24.0,
                   fontWeight: FontWeight.bold,
                 ),
-                textAlign: TextAlign.left, // 텍스트 좌측 정렬
+                textAlign: TextAlign.left,
               ),
             ),
-            Expanded(
+            Spacer(flex: 1),
+            SizedBox(
+              height: 500,
               child: PageView.builder(
                 controller: pageController,
                 itemCount: beers.length,
@@ -133,11 +135,12 @@ class _NextOnboardingScreenState extends State<NextOnboardingScreen> {
                         );
                       }
                     },
-                    pageController: pageController, // pageController 전달
+                    pageController: pageController,
                   );
                 },
               ),
             ),
+            Spacer(flex: 1),
             if (triedBeers.length >= 5)
               Padding(
                 padding: const EdgeInsets.all(16.0),
