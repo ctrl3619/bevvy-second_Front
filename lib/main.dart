@@ -21,7 +21,7 @@ void main() async {
       ChangeNotifierProvider(create: (context) => AppState()),
       ChangeNotifierProvider(create: (context) => LoginService()),
       ChangeNotifierProxyProvider<LoginService, ApiCallService>(
-          create: (context) => ApiCallService(Dio()),
+          create: (context) => ApiCallService(Dio(), context),
           update: (context, loginService, apiCallService) {
             apiCallService!.setAccessToken(loginService.accessToken);
             return apiCallService;
