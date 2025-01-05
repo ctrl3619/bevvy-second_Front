@@ -10,11 +10,18 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'next_screen.dart';
 import 'onboarding_screen.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 // 애플리케이션의 진입점
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Flutter 엔진 초기화
   await initializeFirebase(); // Firebase 초기화
+  // Crashlytics 활성화
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
+
+  // 커스텀 로그 추가 가능
+  FirebaseCrashlytics.instance.log('App started');
+
   runApp(MultiProvider(
     providers: [
       // 상태 관리를 위한 Provider를 설정합니다.
