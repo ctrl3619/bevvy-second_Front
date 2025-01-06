@@ -316,6 +316,11 @@ class _BeerDetailScreenState extends State<BeerDetailScreen> {
               ),
             ),
           ),
+          // 평균 평점 표시
+          Text(
+            '평균 평점: ${_calculateAverageRating(beerData['comments']).toStringAsFixed(1)}',
+            style: TextStyle(fontSize: 16, color: Colors.white70),
+          ),
           // [20241027] RatingBar 위젯 추가
           Center(
             child: RatingBar.builder(

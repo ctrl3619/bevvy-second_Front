@@ -134,56 +134,6 @@ class _LandingPageState extends State<LandingPage> {
     }
   }
 
-  // 사용자 상태를 확인하고 적절한 화면으로 네비게이션하는 메서드
-  Future<void> _checkUserStatus() async {
-    final appState = Provider.of<AppState>(context, listen: false);
-    final apiCallService = Provider.of<ApiCallService>(context, listen: false);
-
-    // 로그인되지 않은 경우 로그인 화면으로 이동
-    if (!appState.isLoggedIn) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginScreen()), // 로그인 화면으로 이동
-      );
-      return; // [20241004] 이후 코드를 실행하지 않도록 함
-    }
-    try {
-      // [20241004] API를 통해 firstIndicator 확인
-      final response = await apiCallService.dio.get('/v1/user/first');
-
-      if (response.statusCode == 200) {
-        final data = response.data;
-
-        // [20241004] firstIndicator가 true인 경우 NextScreen으로 이동
-        if (data['firstIndicator'] == true) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => NextScreen()),
-          );
-        } else {
-          // [20241004] firstIndicator가 false인 경우 OnboardingScreen으로 이동
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => OnboardingScreen()),
-          );
-        }
-      } else {
-        // [20241004] API 호출 실패 시 기본적으로 OnboardingScreen으로 이동
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => OnboardingScreen()),
-        );
-      }
-    } catch (e) {
-      // [20241004] 오류 발생 시 기본적으로 OnboardingScreen으로 이동
-      print('Error fetching user status: $e');
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => OnboardingScreen()),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

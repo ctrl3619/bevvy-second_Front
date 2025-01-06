@@ -46,7 +46,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '26975702543',
     projectId: 'bevvy-91cf0',
     authDomain: 'bevvy-91cf0.firebaseapp.com',
-    storageBucket: 'bevvy-91cf0.appspot.com',
+    storageBucket: 'bevvy-91cf0.firebasestorage.app',
     measurementId: 'G-38GSP46ZEF',
   );
 
@@ -55,7 +55,7 @@ class DefaultFirebaseOptions {
     appId: '1:26975702543:android:56473c57c8593064e21d7a',
     messagingSenderId: '26975702543',
     projectId: 'bevvy-91cf0',
-    storageBucket: 'bevvy-91cf0.appspot.com',
+    storageBucket: 'bevvy-91cf0.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
@@ -63,7 +63,8 @@ class DefaultFirebaseOptions {
     appId: '1:26975702543:ios:d74e1688e341e469e21d7a',
     messagingSenderId: '26975702543',
     projectId: 'bevvy-91cf0',
-    storageBucket: 'bevvy-91cf0.appspot.com',
+    storageBucket: 'bevvy-91cf0.firebasestorage.app',
+    iosClientId: '26975702543-phfrp28jq48vb25orfb0vohukc5522pj.apps.googleusercontent.com',
     iosBundleId: 'com.example.bevvy',
   );
 
@@ -72,7 +73,8 @@ class DefaultFirebaseOptions {
     appId: '1:26975702543:ios:d74e1688e341e469e21d7a',
     messagingSenderId: '26975702543',
     projectId: 'bevvy-91cf0',
-    storageBucket: 'bevvy-91cf0.appspot.com',
+    storageBucket: 'bevvy-91cf0.firebasestorage.app',
+    iosClientId: '26975702543-phfrp28jq48vb25orfb0vohukc5522pj.apps.googleusercontent.com',
     iosBundleId: 'com.example.bevvy',
   );
 
@@ -82,7 +84,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '26975702543',
     projectId: 'bevvy-91cf0',
     authDomain: 'bevvy-91cf0.firebaseapp.com',
-    storageBucket: 'bevvy-91cf0.appspot.com',
+    storageBucket: 'bevvy-91cf0.firebasestorage.app',
     measurementId: 'G-L8HD5FWCDP',
   );
+
 }
