@@ -23,7 +23,7 @@ dependencies:
   dio: ^5.4.3+1
   flutter_card_swiper: ^7.0.1
   lottie: ^3.1.0
-  firebase_crashlytics: ^3.4.15
+  firebase_crashlytics: ^3.4.19
   firebase_analytics: ^10.8.5
   archive: ^3.6.1  # 호환성 유지를 위해 버전 낮춤
   async: ^2.11.0  # 호환성 유지를 위해 버전 낮춤

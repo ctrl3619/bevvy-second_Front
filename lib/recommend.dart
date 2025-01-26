@@ -29,6 +29,8 @@ class _BeerRecommendationScreenState extends State<BeerRecommendationScreen>
     '완벽한 한 잔을 준비하고 있어요 🎯'
   ];
   int _currentMessageIndex = 0;
+  String _selectedPlace = '편의점'; // 장소 선택 상태 추가
+  final List<String> _places = ['편의점', '리터비터바']; // 장소 목록 추가
 
   @override
   void initState() {
@@ -110,9 +112,10 @@ class _BeerRecommendationScreenState extends State<BeerRecommendationScreen>
             child: SizedBox(
               width: double.infinity,
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 24.0,
-                  horizontal: 16.0,
+                padding: const EdgeInsets.only(
+                  top: 24.0,
+                  left: 16.0,
+                  right: 16.0,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,12 +128,41 @@ class _BeerRecommendationScreenState extends State<BeerRecommendationScreen>
                         color: Colors.white,
                       ),
                     ),
-                    SizedBox(height: 8.0), // 두 텍스트 사이 간격
+                    SizedBox(height: 8.0),
                     Text(
                       '평가 데이터를 기반해 맥주를 추천해 줄게요',
                       style: TextStyle(
                         fontSize: 16,
                         color: Colors.white.withOpacity(0.8),
+                      ),
+                    ),
+                    SizedBox(height: 16.0),
+                    // 장소 선택 드롭다운 추가
+                    Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Color.fromARGB(255, 26, 26, 26),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: DropdownButton<String>(
+                        value: _selectedPlace,
+                        isExpanded: true,
+                        dropdownColor: Color.fromARGB(255, 26, 26, 26),
+                        style: TextStyle(color: Colors.white),
+                        icon: Icon(Icons.arrow_drop_down, color: Colors.white),
+                        underline: SizedBox(),
+                        items: _places.map((String place) {
+                          return DropdownMenuItem<String>(
+                            value: place,
+                            child: Text(place),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _selectedPlace = newValue!;
+                          });
+                        },
                       ),
                     ),
                   ],
@@ -175,21 +207,108 @@ class _BeerRecommendationScreenState extends State<BeerRecommendationScreen>
                         : Stack(
                             children: [
                               CardSwiper(
-                                cardsCount: 3, // 고정된 3개의 카드
-                                numberOfCardsDisplayed: 3, // 한 번에 1개만 표시
+                                cardsCount: 3,
+                                numberOfCardsDisplayed: 3,
+                                backCardOffset: const Offset(0, 24),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 16, horizontal: 16),
+                                scale: 0.95,
                                 cardBuilder: (context, index, percentThresholdX,
                                     percentThresholdY) {
                                   final beer = _beerList[index];
-                                  return BeerCard(
-                                    beerName:
-                                        beer['beerName'] ?? 'Unknown Beer',
-                                    beerInfo: beer['beerInformation'] ?? '',
-                                    beerTags: beer['beerCharacteristicHashTag']
-                                            ?.cast<String>() ??
-                                        [],
-                                    beerImageUrl: beer['beerImageUrl'] ?? '',
-                                    alcoholDegree:
-                                        beer['beerAlcholDegree'] ?? 0,
+                                  return Card(
+                                    elevation: 4.0,
+                                    shadowColor: Colors.black.withOpacity(0.5),
+                                    color: Color.fromARGB(255, 26, 26, 26),
+                                    margin: EdgeInsets.zero,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16.0),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Center(
+                                            child: Image.network(
+                                              beer['beerImageUrl'] ?? '',
+                                              height: 200,
+                                              width: 200,
+                                              errorBuilder:
+                                                  (context, error, stackTrace) {
+                                                return Icon(
+                                                    Icons.image_not_supported,
+                                                    size: 100,
+                                                    color: Colors.white);
+                                              },
+                                            ),
+                                          ),
+                                          SizedBox(height: 16),
+                                          Text(
+                                            beer['beerName'] ?? 'Unknown Beer',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 24,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          Text(
+                                            '${beer['beerAlcholDegree'] ?? 0}% ABV',
+                                            style: TextStyle(
+                                                color: Colors.white
+                                                    .withOpacity(0.7),
+                                                fontSize: 16),
+                                          ),
+                                          const SizedBox(height: 16.0),
+                                          Text(
+                                            beer['beerInformation'] ?? '',
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                          const SizedBox(height: 16.0),
+                                          Wrap(
+                                            spacing: 8,
+                                            runSpacing: 8,
+                                            children:
+                                                (beer['beerCharacteristicHashTag']
+                                                            as List<dynamic>?)
+                                                        ?.map(
+                                                            (tag) => Container(
+                                                                  padding: EdgeInsets
+                                                                      .symmetric(
+                                                                          horizontal:
+                                                                              12,
+                                                                          vertical:
+                                                                              6),
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    color: Color
+                                                                        .fromARGB(
+                                                                            255,
+                                                                            46,
+                                                                            46,
+                                                                            46),
+                                                                    borderRadius:
+                                                                        BorderRadius
+                                                                            .circular(8),
+                                                                  ),
+                                                                  child: Text(
+                                                                    tag.toString(),
+                                                                    style:
+                                                                        TextStyle(
+                                                                      color: Colors
+                                                                          .white,
+                                                                      fontSize:
+                                                                          12.0,
+                                                                    ),
+                                                                  ),
+                                                                ))
+                                                        .toList() ??
+                                                    [],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   );
                                 },
                                 onEnd: () =>
@@ -290,7 +409,7 @@ class BeerCard extends StatelessWidget {
                 },
               ),
             ),
-            Spacer(flex: 1),
+            SizedBox(height: 16),
             Text(
               beerName,
               style: TextStyle(
