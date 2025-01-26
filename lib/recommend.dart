@@ -7,7 +7,12 @@ import 'dart:async';
 import 'package:lottie/lottie.dart';
 
 class BeerRecommendationScreen extends StatefulWidget {
-  const BeerRecommendationScreen({super.key});
+  final List<Map<String, String>> pubList; // 펍 리스트 추가
+
+  const BeerRecommendationScreen({
+    super.key,
+    required this.pubList, // 생성자에 pubList 추가
+  });
 
   @override
   _BeerRecommendationScreenState createState() =>
@@ -29,12 +34,16 @@ class _BeerRecommendationScreenState extends State<BeerRecommendationScreen>
     '완벽한 한 잔을 준비하고 있어요 🎯'
   ];
   int _currentMessageIndex = 0;
-  String _selectedPlace = '편의점'; // 장소 선택 상태 추가
-  final List<String> _places = ['편의점', '리터비터바']; // 장소 목록 추가
+  String _selectedPlace = '전체'; // 기본값을 '전체'로 변경
+  List<String> _places = ['전체']; // 기본값으로 '전체' 설정
+  Map<String, String> _pubIdMap = {};
 
   @override
   void initState() {
     super.initState();
+    _fetchRecommendedPubs();
+    _fetchRecommendedBeers();
+
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
@@ -51,8 +60,6 @@ class _BeerRecommendationScreenState extends State<BeerRecommendationScreen>
             (_currentMessageIndex + 1) % _loadingMessages.length;
       });
     });
-
-    _fetchRecommendedBeers();
   }
 
   @override
@@ -66,20 +73,30 @@ class _BeerRecommendationScreenState extends State<BeerRecommendationScreen>
     final apiCallService = Provider.of<ApiCallService>(context, listen: false);
 
     try {
+      final isAllSelected = _selectedPlace == '전체';
+      final endpoint =
+          isAllSelected ? '/v1/ai/recommend/beer' : '/v1/ai/recommend/pub/beer';
+
+      print('호출 API: $endpoint'); // API 엔드포인트 로그
+      print('선택된 장소: $_selectedPlace'); // 선택된 장소 로그
+      if (!isAllSelected) {
+        print('선택된 펍 ID: ${_pubIdMap[_selectedPlace]}'); // 펍 ID 로그
+      }
+
       final response = await apiCallService.dio.get(
-        '/v1/ai/recommend/beer',
+        endpoint,
+        queryParameters:
+            isAllSelected ? null : {'pubId': _pubIdMap[_selectedPlace]},
       );
 
-      // API 응답에서 'data' 필드를 먼저 확인한 후 'beerList'에 접근
       if (response.data != null) {
-        // 응답 데이터 디버깅용 출력
         print('API Response: ${response.data}');
 
         if (response.data['data'] != null &&
             response.data['data']['beerList'] != null) {
           setState(() {
-            _beerList = response.data['data']['beerList']; // 추천 맥주 리스트 저장
-            _isLoading = false; // 로딩 완료
+            _beerList = response.data['data']['beerList'];
+            _isLoading = false;
           });
         } else {
           setState(() {
@@ -88,7 +105,6 @@ class _BeerRecommendationScreenState extends State<BeerRecommendationScreen>
           });
         }
       } else {
-        // Null 응답 처리
         setState(() {
           _isLoading = false;
           _errorMessage = '추천 맥주 목록이 비어 있습니다.';
@@ -101,6 +117,49 @@ class _BeerRecommendationScreenState extends State<BeerRecommendationScreen>
       });
       print('Error fetching recommended beers: $e');
     }
+  }
+
+  // 추천 펍 조회 API 호출 함수
+  Future<void> _fetchRecommendedPubs() async {
+    final apiCallService = Provider.of<ApiCallService>(context, listen: false);
+
+    try {
+      final response = await apiCallService.dio.get(
+        '/v1/pub/recommend',
+        queryParameters: {
+          'page': 0,
+          'size': 10,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final pubList = response.data['data']['recommendPubList'] as List;
+        setState(() {
+          _places = [
+            '전체',
+            ...pubList.map((pub) => pub['name']?.toString() ?? '')
+          ];
+
+          // pubIdMap 업데이트
+          for (var pub in pubList) {
+            if (pub['name'] != null && pub['pubId'] != null) {
+              _pubIdMap[pub['name']!.toString()] = pub['pubId']!.toString();
+            }
+          }
+        });
+      }
+    } catch (e) {
+      print('Error fetching recommended pubs: $e');
+    }
+  }
+
+  // 장소 선택 변경 시 처리
+  void _onPlaceChanged(String? newValue) {
+    setState(() {
+      _selectedPlace = newValue!;
+      _isLoading = true;
+    });
+    _fetchRecommendedBeers();
   }
 
   @override
@@ -158,11 +217,7 @@ class _BeerRecommendationScreenState extends State<BeerRecommendationScreen>
                             child: Text(place),
                           );
                         }).toList(),
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            _selectedPlace = newValue!;
-                          });
-                        },
+                        onChanged: _onPlaceChanged,
                       ),
                     ),
                   ],
@@ -233,8 +288,8 @@ class _BeerRecommendationScreenState extends State<BeerRecommendationScreen>
                                           Center(
                                             child: Image.network(
                                               beer['beerImageUrl'] ?? '',
-                                              height: 200,
-                                              width: 200,
+                                              height: 160,
+                                              width: 160,
                                               errorBuilder:
                                                   (context, error, stackTrace) {
                                                 return Icon(

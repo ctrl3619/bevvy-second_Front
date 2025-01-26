@@ -122,7 +122,15 @@ class _NextScreenState extends State<NextScreen> {
                             PageRouteBuilder(
                               pageBuilder:
                                   (context, animation, secondaryAnimation) =>
-                                      BeerRecommendationScreen(),
+                                      BeerRecommendationScreen(
+                                pubList: recommendedPubs
+                                    .map((pub) => {
+                                          'name': pub['name']?.toString() ?? '',
+                                          'pubId':
+                                              pub['pubId']?.toString() ?? '',
+                                        })
+                                    .toList(),
+                              ),
                               transitionDuration: Duration.zero,
                               reverseTransitionDuration: Duration.zero,
                             ),
