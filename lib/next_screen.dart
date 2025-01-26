@@ -15,15 +15,12 @@ class NextScreen extends StatefulWidget {
 
 class _NextScreenState extends State<NextScreen> {
   List<dynamic> recommendedBeers = [];
-  List<dynamic> recommendedPubs = [];
   bool isLoadingBeers = true;
-  bool isLoadingPubs = true;
 
   @override
   void initState() {
     super.initState();
     fetchRecommendedBeers();
-    fetchRecommendedPubs();
   }
 
   Future<void> fetchRecommendedBeers() async {
@@ -51,35 +48,6 @@ class _NextScreenState extends State<NextScreen> {
       print("An error occurred: $e");
       setState(() {
         isLoadingBeers = false;
-      });
-    }
-  }
-
-  Future<void> fetchRecommendedPubs() async {
-    final apiCallService = Provider.of<ApiCallService>(context, listen: false);
-    try {
-      final response = await apiCallService.dio
-          .get('/v1/pub/recommend', queryParameters: {'page': 0, 'size': 5});
-
-      print("PopularPub Response status: ${response.statusCode}");
-      print("PopularPub Response message: ${response.data['message']}");
-
-      if (response.statusCode == 200) {
-        final data = response.data;
-        setState(() {
-          recommendedPubs = data['data']['recommendPubList'];
-          isLoadingPubs = false;
-        });
-      } else {
-        print("Failed to load recommended pubs: ${response.statusCode}");
-        setState(() {
-          isLoadingPubs = false;
-        });
-      }
-    } catch (e) {
-      print("An error occurred: $e");
-      setState(() {
-        isLoadingPubs = false;
       });
     }
   }
@@ -122,15 +90,7 @@ class _NextScreenState extends State<NextScreen> {
                             PageRouteBuilder(
                               pageBuilder:
                                   (context, animation, secondaryAnimation) =>
-                                      BeerRecommendationScreen(
-                                pubList: recommendedPubs
-                                    .map((pub) => {
-                                          'name': pub['name']?.toString() ?? '',
-                                          'pubId':
-                                              pub['pubId']?.toString() ?? '',
-                                        })
-                                    .toList(),
-                              ),
+                                      BeerRecommendationScreen(),
                               transitionDuration: Duration.zero,
                               reverseTransitionDuration: Duration.zero,
                             ),
@@ -172,120 +132,105 @@ class _NextScreenState extends State<NextScreen> {
               SizedBox(height: 16),
               isLoadingBeers
                   ? Center(child: CircularProgressIndicator())
-                  : SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: recommendedBeers.map((beer) {
-                          final beerId = beer['beerId']?.toString() ?? '';
-                          final imageUrl = beer['beerImageUrl'] ?? '';
-                          final beerName = beer['beerName'] ?? '이름 없음';
-                          final rating = beer['beerRating']?.toDouble() ?? 0.0;
+                  : GridView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 0.75,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                      ),
+                      itemCount: recommendedBeers.length,
+                      itemBuilder: (context, index) {
+                        final beer = recommendedBeers[index];
+                        final beerId = beer['beerId']?.toString() ?? '';
+                        final imageUrl = beer['beerImageUrl'] ?? '';
+                        final beerName = beer['beerName'] ?? '이름 없음';
+                        final rating = beer['beerRating']?.toDouble() ?? 0.0;
 
-                          return GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => BeerDetailScreen(
-                                    beerId: beerId,
-                                    initialSavedState: false,
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => BeerDetailScreen(
+                                  beerId: beerId,
+                                  initialSavedState: false,
+                                ),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.grey[900],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    padding: EdgeInsets.all(8),
+                                    child: Center(
+                                      child: Image.network(
+                                        imageUrl,
+                                        fit: BoxFit.contain,
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                          return Container(
+                                            color: Colors.grey[800],
+                                            child: Icon(Icons.error,
+                                                color: Colors.grey),
+                                          );
+                                        },
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              );
-                            },
-                            child: Container(
-                              margin: EdgeInsets.only(right: 16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    height: 156,
-                                    width: 118,
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[900],
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Center(
-                                        child: Image.network(
-                                          imageUrl,
-                                          fit: BoxFit.contain,
-                                          errorBuilder:
-                                              (context, error, stackTrace) {
-                                            return Container(
-                                              color: Colors.grey[800],
-                                              child: Icon(Icons.error,
-                                                  color: Colors.grey),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(height: 8),
-                                  Text(
-                                    beerName,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  Row(
+                                Padding(
+                                  padding: EdgeInsets.all(8),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Icon(
-                                        Icons.star,
-                                        color: Colors.amber,
-                                        size: 16,
-                                      ),
-                                      SizedBox(width: 4),
                                       Text(
-                                        rating.toStringAsFixed(1),
+                                        beerName,
                                         style: TextStyle(
-                                          color: Colors.white.withOpacity(0.7),
-                                          fontSize: 12,
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
                                         ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.star,
+                                            color: Colors.amber,
+                                            size: 16,
+                                          ),
+                                          SizedBox(width: 4),
+                                          Text(
+                                            rating.toStringAsFixed(1),
+                                            style: TextStyle(
+                                              color:
+                                                  Colors.white.withOpacity(0.7),
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-              SizedBox(height: 32),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "요즘 핫한 수제맥주 펍",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 16),
-              isLoadingPubs
-                  ? Center(child: CircularProgressIndicator())
-                  : SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: recommendedPubs.map((pub) {
-                          return PopularPub(
-                            imageUrl: pub['imageUrlList']?[0] ?? '',
-                            name: pub['name'] ?? '이름 없음',
-                            location: pub['location'] ?? '위치 정보 없음',
-                            pubInformation: pub['pubInformation'] ?? '',
-                            destination: pub['pubId']?.toString() ?? '',
-                          );
-                        }).toList(),
-                      ),
+                          ),
+                        );
+                      },
                     ),
             ],
           ),

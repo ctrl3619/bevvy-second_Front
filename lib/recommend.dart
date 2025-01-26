@@ -7,12 +7,7 @@ import 'dart:async';
 import 'package:lottie/lottie.dart';
 
 class BeerRecommendationScreen extends StatefulWidget {
-  final List<Map<String, String>> pubList; // 펍 리스트 추가
-
-  const BeerRecommendationScreen({
-    super.key,
-    required this.pubList, // 생성자에 pubList 추가
-  });
+  const BeerRecommendationScreen({super.key}); // pubList 파라미터 제거
 
   @override
   _BeerRecommendationScreenState createState() =>
@@ -137,13 +132,15 @@ class _BeerRecommendationScreenState extends State<BeerRecommendationScreen>
         setState(() {
           _places = [
             '전체',
-            ...pubList.map((pub) => pub['name']?.toString() ?? '')
+            ...pubList
+                .map((pub) => '${pub['name']}§${pub['location']}') // 구분자로 § 사용
           ];
 
           // pubIdMap 업데이트
           for (var pub in pubList) {
             if (pub['name'] != null && pub['pubId'] != null) {
-              _pubIdMap[pub['name']!.toString()] = pub['pubId']!.toString();
+              _pubIdMap['${pub['name']}§${pub['location']}'] =
+                  pub['pubId']!.toString();
             }
           }
         });
@@ -160,6 +157,36 @@ class _BeerRecommendationScreenState extends State<BeerRecommendationScreen>
       _isLoading = true;
     });
     _fetchRecommendedBeers();
+  }
+
+  Widget _buildDropdownMenuItem(String value) {
+    if (value == '전체') {
+      return Text(value);
+    }
+
+    final parts = value.split('§');
+    final name = parts[0];
+    final location = parts[1];
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(name),
+        Row(
+          children: [
+            Icon(Icons.location_on, size: 16, color: Colors.grey),
+            SizedBox(width: 4),
+            Text(
+              location,
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 
   @override
@@ -199,7 +226,7 @@ class _BeerRecommendationScreenState extends State<BeerRecommendationScreen>
                     // 장소 선택 드롭다운 추가
                     Container(
                       padding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                       decoration: BoxDecoration(
                         color: Color.fromARGB(255, 26, 26, 26),
                         borderRadius: BorderRadius.circular(8),
@@ -211,10 +238,13 @@ class _BeerRecommendationScreenState extends State<BeerRecommendationScreen>
                         style: TextStyle(color: Colors.white),
                         icon: Icon(Icons.arrow_drop_down, color: Colors.white),
                         underline: SizedBox(),
-                        items: _places.map((String place) {
+                        items: _places.map((String value) {
                           return DropdownMenuItem<String>(
-                            value: place,
-                            child: Text(place),
+                            value: value,
+                            child: Container(
+                              width: double.infinity, // 부모 컨테이너의 전체 너비 사용
+                              child: _buildDropdownMenuItem(value),
+                            ),
                           );
                         }).toList(),
                         onChanged: _onPlaceChanged,
@@ -308,7 +338,7 @@ class _BeerRecommendationScreenState extends State<BeerRecommendationScreen>
                                                 fontWeight: FontWeight.bold),
                                           ),
                                           Text(
-                                            '${beer['beerAlcholDegree'] ?? 0}% ABV',
+                                            '${beer['beerAlcoholDegree'] ?? 0}% ABV',
                                             style: TextStyle(
                                                 color: Colors.white
                                                     .withOpacity(0.7),

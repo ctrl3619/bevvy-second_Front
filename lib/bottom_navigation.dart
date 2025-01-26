@@ -45,9 +45,7 @@ class BottomNavigation extends StatelessWidget {
               screen = NextScreen();
               break;
             case 1:
-              screen = BeerRecommendationScreen(
-                pubList: [], // 빈 리스트로 초기화하거나 필요한 펍 리스트 데이터 전달
-              );
+              screen = BeerRecommendationScreen();
               break;
             case 2:
               screen = SearchScreen();
